@@ -158,6 +158,35 @@ func main(){
 	//删除举报消息
 	http.HandleFunc("/deleteReport",controller.DeleteReport)
 
+	//查看用户
+	http.HandleFunc("/look_user",controller.LookUser)
+
+	//申请添加好友
+	http.HandleFunc("/aksToMakeFriend",controller.AskToMakeFriend)
+
+	//获取申请成为好友消息
+	http.HandleFunc("/getMakeFriendMessage",controller.GetMakeFriendMessage)
+
+	//是否同意成为好友
+	http.HandleFunc("/isAgreeToMakeFriend",controller.IsAgreeToMakeFriend)
+
+	//查看我的好友
+	http.HandleFunc("/getMyFriend",controller.GetMyFriend)
+
+	//删除好友
+	http.HandleFunc("/deleteFriend",controller.DeleteFriend)
+
+	//关注用户
+	http.HandleFunc("/likedUser",controller.LikedUser)
+
+	//取消关注
+	http.HandleFunc("/disLikedUser",controller.DisLikedUser)
+
+	//查看我关注的用户
+	http.HandleFunc("/getMyLikedUser",controller.GetMyLikedUser)
+
+	//查看我的粉丝
+	http.HandleFunc("/getMyFan",controller.GetMyFan)
 
 	//通过Ajax判断吧名是否可用
 	http.HandleFunc("/checkBarName",controller.CheckBarName)

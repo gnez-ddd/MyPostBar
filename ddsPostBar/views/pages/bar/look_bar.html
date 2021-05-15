@@ -86,7 +86,7 @@
         <input class="itxt" type="text" value={{.BarName}} disabled="disabled" class="barName" id="barName"/>
         &nbsp;&nbsp;&nbsp;
         吧主：
-        <input class="itxt" type="text" value={{.BarHostName}} disabled="disabled" class="barHostName" id="barHostName"/>
+        <a href="/look_user?userName={{.BarHostName}}">{{.BarHostName}}</a>
         &nbsp;&nbsp;&nbsp;
         {{if.IsBarOwner}}
         <a href="/toSendNoticePage?barName={{.BarName}}" class="sendNotice">发布公告</a>
@@ -206,6 +206,7 @@
         {{range.Bar}}
         <a href="/postsOrderBy?barName={{.BarName}}&kind=time">按时间排序</a>
         <a href="/postsOrderBy?barName={{.BarName}}&kind=postReply">按帖子回复量排序</a>
+        <br/>
         <br/>
         {{end}}
 

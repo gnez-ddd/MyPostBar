@@ -30,16 +30,16 @@ func FindUserByUserID(id int64)*model.Users{
 	return user
 }
 
-// FindUserByUserName 根据用户名查找用户1
+// FindUserByUserName 根据用户名查找用户
 func FindUserByUserName(username string)*model.Users{
 	//写sql语句
-	sqlStr := "select id,username,password,email,head_path,status from users where username = ? ;"
+	sqlStr := "select status,id,username,password,email,head_path,salt,experience,signInTime from users where username = ? ;"
 	//执行查找语句
 	row := utils.Db.QueryRow(sqlStr,username)
 	//创建一个结构体用于存储查找出来的用户
 	user := &model.Users{}
 	//将查找出来的信息存储起来
-	_ = row.Scan(&user.UserID,&user.UserName,&user.PassWord,&user.Email,&user.HeadPath,&user.Status)
+	_ = row.Scan(&user.Status,&user.UserID,&user.UserName,&user.PassWord,&user.Email,&user.HeadPath,&user.Salt,&user.Experience,&user.LastSign)
 	return user
 }
 

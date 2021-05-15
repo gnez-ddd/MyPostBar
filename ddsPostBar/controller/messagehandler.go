@@ -110,3 +110,19 @@ func DeleteReport(w http.ResponseWriter,r *http.Request){
 	}
 	GetReportMessage(w,r)
 }
+
+//GetMakeFriendMessage 得到申请成为好友消息
+func GetMakeFriendMessage(w http.ResponseWriter,r *http.Request){
+	//获取当前用户
+	_,sess := dao.IsLogin(r)
+	//调用数据库进行查询
+	users := dao.FindMakeFriendUserIDByReceiverID(sess.UserID)
+	//通过遍历查找请求者用户名
+	for _,v := range users{
+		user := dao.FindUserByUserID(v.UserID)
+		v.UserName = user.UserName
+	}
+	t := template.Must(template.ParseFiles("views/pages/message/makeFriendMessage.html"))
+	_ = t.Execute(w,users)
+
+}

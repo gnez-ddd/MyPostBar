@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的好友</title>
+</head>
+<body>
+    <span>我的好友</span>
+    &nbsp;&nbsp;&nbsp;
+    <a href="/index">首页</a>
+    <br/>
+    <br/>
+    {{range.}}
+    <a href="/look_user?userName={{.UserName}}">{{.UserName}}</a>
+    &nbsp;&nbsp;&nbsp;
+    <a href="/deleteFriend?friendID={{.UserID}}">删除好友</a>
+    <br/>
+    <br/>
+    {{end}}
+</body>
+</html>

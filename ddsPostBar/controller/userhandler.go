@@ -132,7 +132,6 @@ func UserLogin(w http.ResponseWriter,r *http.Request){
 		}
 }
 
-
 // FindPassWord 用户密码找回处理器
 func FindPassWord(w http.ResponseWriter,r *http.Request){
 	//获取邮箱
@@ -297,7 +296,7 @@ func ToIndexPage(w http.ResponseWriter,r *http.Request){
 	page.Bar = dao.GetAllBars()
 
 	//获取帖子
-	page.Posts = dao.GetAllCreatePost()
+	page.Posts = dao.GetAllCreatePostOrderByExperience()
 
 	//判断是否已经登录
 	judge,sess := dao.IsLogin(r)
@@ -427,3 +426,34 @@ func BannedUser(w http.ResponseWriter,r *http.Request){
 	}
 	GetReportMessage(w,r)
 }
+
+//LookUser 查看用户
+func LookUser(w http.ResponseWriter,r *http.Request){
+	//当前用户是否登录
+	judge,sess := dao.IsLogin(r)
+	userName := r.FormValue("userName")
+	user := dao.FindUserByUserName(userName)
+	//如果用户不存在
+	if user.Status == 0 {
+		t := template.Must(template.ParseFiles("views/pages/user/look_user_failed.html"))
+		_ = t.Execute(w,"")
+		return
+	}
+	//如果用户存在
+	//如果用户有登录
+	if judge == true {
+		//判断是否为好友
+		user.IsFriend = dao.FindIsFriend(user.UserID,sess.UserID)
+		//判断是否关注了
+		user.IsLiked = dao.FindIsLiked(sess.UserID,user.UserID)
+	}
+	//若查看的用户为用户本人
+	if user.UserID == sess.UserID {
+		user.IsLiked = true
+		user.IsFriend = true
+	}
+
+	t := template.Must(template.ParseFiles("views/pages/user/look_user.html"))
+	_ = t.Execute(w,user)
+}
+

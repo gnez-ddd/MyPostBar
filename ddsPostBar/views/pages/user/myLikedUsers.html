@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我关注的用户</title>
+</head>
+<body>
+  <span>我关注的用户</span>
+  &nbsp;&nbsp;&nbsp;
+  <a href="/index">首页</a>
+  <br/>
+  <br/>
+  {{range.}}
+  <a href="/look_user?userName={{.UserName}}">{{.UserName}}</a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="/disLikedUser?id={{.UserID}}">取消关注</a>
+  <br/>
+  <br/>
+  {{end}}
+</body>
+</html>

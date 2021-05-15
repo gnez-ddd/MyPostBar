@@ -34,10 +34,10 @@ func FindOwnerIDByBarNameAndTitle(barName string,title string)(id int64){
 	return
 }
 
-//FindCreatePostsByBarName 根据吧名获取所有创建的帖子按时间排序
+//FindCreatePostsByBarName 根据吧名获取所有创建的帖子按用户活跃度排序
 func FindCreatePostsByBarName(barName string)[]*model.Post{
 	//写sql语句
-	sqlStr := "select id,host_id,bar_name,kind,title,time,content from posts where bar_name = ? and kind = ? and status = 1 order by time desc ;"
+	sqlStr := "select bar_name,title from posts,users where posts.bar_name = ? and posts.kind = ? and posts.status = 1 and posts.host_id = users.id order by users.experience desc ;"
 	//执行查找语句
 	rows,_ := utils.Db.Query(sqlStr,barName,"create")
 	//建立切片
@@ -45,7 +45,7 @@ func FindCreatePostsByBarName(barName string)[]*model.Post{
 	for rows.Next(){
 		//创建一个变量用于存储
 		post := &model.Post{}
-		_ = rows.Scan(&post.PostID,&post.PostHostID,&post.BarName,&post.Kind,&post.PostTitle,&post.PostDate,&post.PostContent)
+		_ = rows.Scan(&post.BarName,&post.PostTitle)
 		//添加到切片中
 		posts = append(posts,post)
 	}
@@ -128,10 +128,10 @@ func DeletePostsByBarNameAndPostTitle(barName string,postTitle string){
 	_,_ = utils.Db.Exec(sqlStr,barName,postTitle)
 }
 
-//GetAllCreatePost 获取所有创建的帖子
-func GetAllCreatePost()[]*model.Post{
+//GetAllCreatePostOrderByExperience 获取所有创建的帖子
+func GetAllCreatePostOrderByExperience()[]*model.Post{
 	//写sql语句
-	sqlStr := "select bar_name,title from posts where kind = ? and status = 1;"
+	sqlStr := "select bar_name,title from posts,users where posts.kind = ? and posts.status = 1 and posts.host_id = users.id order by users.experience desc ;"
 	rows,_ := utils.Db.Query(sqlStr,"create")
 	var posts []*model.Post
 	for rows.Next(){
@@ -145,7 +145,7 @@ func GetAllCreatePost()[]*model.Post{
 //FindPostsByFind 模糊搜索帖子
 func FindPostsByFind(find string)[]*model.Post{
 	//写sql语句
-	sqlStr := "select bar_name,title from posts where kind = ? and title like ? and status = 1;"
+	sqlStr := "select bar_name,title from posts,users where posts.kind = ? and posts.title like ? and posts.status = 1 and posts.host_id = users.id order by  users.experience desc ;"
 	rows,_ := utils.Db.Query(sqlStr,"create",find)
 	var posts []*model.Post
 	for rows.Next(){
@@ -159,7 +159,7 @@ func FindPostsByFind(find string)[]*model.Post{
 //FindPostsByBarNameAndFind 模糊搜索贴吧内帖子
 func FindPostsByBarNameAndFind(barName string,find string)[]*model.Post{
 	//写sql语句
-	sqlStr := "select bar_name,title from posts where kind = ? and bar_name = ? and title like ? and status = 1;"
+	sqlStr := "select bar_name,title from posts,users where posts.kind = ? and posts.bar_name = ? and posts.title like ? and posts.status = 1 and posts.host_id = users.id order by users.experience desc ;"
 	rows,_ := utils.Db.Query(sqlStr,"create",barName,find)
 	var posts []*model.Post
 	for rows.Next(){

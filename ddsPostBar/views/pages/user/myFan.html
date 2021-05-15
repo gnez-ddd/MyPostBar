@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的粉丝</title>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+      $(function () {
+        $('#likedUser').click(function () {
+          //获取id
+          let id = $('#likedUser').val();
+          let url = "/likedUser";
+          let param = {"id":id};
+          $.post(url,param,function (res) {
+            //将响应信息设置到span元素
+            $("#msg").html(res);
+            //获取id为msg的span元素的值
+            let msg = document.getElementById('msg').innerHTML;
+            alert(msg);
+          });
+          $(this).attr({"disabled":"disabled"});
+        });
+      })
+    </script>
+</head>
+<body>
+<span class="errorMsg" id="msg" style="display: none" >{{.}}</span>
+    <span>我的粉丝</span>
+    &nbsp;&nbsp;&nbsp;
+    <a href="/index">首页</a>
+    <br/>
+    <br/>
+    {{range.}}
+    <a href="/look_user?userName={{.UserName}}">{{.UserName}}</a>
+    &nbsp;&nbsp;&nbsp;
+    {{if.IsLiked}}
+    {{else}}
+    <button id="likedUser" value={{.UserID}}>关注</button>
+    {{end}}
+    <br/>
+    <br/>
+    {{end}}
+</body>
+</html>

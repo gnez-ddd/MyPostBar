@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>查看用户</title>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            //添加好友
+            $('#makeFriend').click(function () {
+                //获取好友名
+                let friendID = $('#userID').val();
+                let url = "/askToMakeFriend";
+                let param = {"friendID":friendID};
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素
+                    $("#msg").html(res);
+                    //获取id为msg的span元素的值
+                    let msg = document.getElementById('msg').innerHTML;
+                    alert(msg);
+                    if (msg == "已向对方申请添加为好友！"){
+                        $('#makeFriend').attr({"disabled":"disabled"});
+                    }
+                });
+            });
+            //关注好友
+            $('#likedUser').click(function () {
+                //获取id
+                let id = $('#userID').val();
+                let url = "/likedUser";
+                let param = {"id":id};
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素
+                    $("#msg").html(res);
+                    //获取id为msg的span元素的值
+                    let msg = document.getElementById('msg').innerHTML;
+                    alert(msg);
+                });
+                $(this).attr({"disabled":"disabled"});
+            });
+        });
+    </script>
+</head>
+<body>
+<span class="errorMsg" id="msg" style="display: none" >{{.}}</span>
+<a href="/index">首页</a>
+<br/>
+<br/>
+    <div>
+      用户名：
+      <input class="itxt" type="text" disabled="disabled" value={{.UserName}} name="userName" id="userName"/>
+      <input class="itxt" type="text" value={{.UserID}} id="userID" style="display: none"/>
+      <br>
+      <br/>
+      头像：
+      <img src={{.HeadPath}} width="80px" height="80px"/>
+      <br/>
+      <br/>
+      活跃值：
+      <input class="itxt" type="text" disabled="disabled" value={{.Experience}} name="experience" id="experience"/>
+      <br/>
+      <br/>
+<!--        是不是好友-->
+      {{if.IsFriend}}
+      {{else}}
+      <button id="makeFriend">加为好友</button>
+      {{end}}
+      &nbsp;&nbsp;&nbsp;
+<!--        是不是关注了-->
+      {{if.IsLiked}}
+      {{else}}
+      <button id="likedUser">关注</button>
+      {{end}}
+
+      <br/>
+    </div>
+</body>
+</html>

@@ -17,4 +17,6 @@ type Users struct{
 	//今日是否签到过
 	IsSignIn bool
 	Status int64
+	IsFriend bool
+	IsLiked bool
 }
