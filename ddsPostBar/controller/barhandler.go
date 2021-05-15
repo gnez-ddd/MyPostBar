@@ -24,16 +24,12 @@ func BarCreate(w http.ResponseWriter,r *http.Request){
 		kind := "create"
 		//调用数据库将该帖吧存放进数据库
 		dao.AddBar(user.UserID,barName,kind)
-
 		//在管理员的信息表中添加申请创建贴吧信息
 		dao.AddCreateBarMessage(13,sess.UserID,barName)
-
 		//去往等待审核页面
 		t := template.Must(template.ParseFiles("views/pages/bar/create_bar_wait.html"))
 		_ = t.Execute(w,"")
-
 	}
-
 }
 
 //CheckBarName 通过Ajax请求验证吧名是否可用
@@ -51,43 +47,31 @@ func CheckBarName(w http.ResponseWriter,r *http.Request){
 	}
 }
 
-//DisagreeToCreateBar 拒绝创建贴吧
-func DisagreeToCreateBar(w http.ResponseWriter,r *http.Request){
-	//获取吧名
+//IsAgreeToCreateBar 是否同意创建贴吧
+func IsAgreeToCreateBar(w http.ResponseWriter,r *http.Request){
+	//获取吧名和判断
 	barName := r.PostFormValue("barName")
-	//根据吧名删除给贴吧
-	dao.DeleteBarByBarName(barName)
-
+	kind := r.PostFormValue("kind")
+	//同意创建贴吧,修改贴吧状态
+	if kind == "agree" {
+		dao.SetBarStatusByBarName(barName, 1)
+	} else {
+		//不同意则根据吧名删除给贴吧
+		dao.DeleteBarByBarName(barName)
+	}
 	//根据吧名删除申请创建贴吧消息
 	dao.DeleteCreateBarMessageByBarName(barName)
-	_,_ = w.Write([]byte("拒绝创建贴吧！"))
-
-}
-
-//AgreeToCreateBar 同意创建贴吧
-func AgreeToCreateBar(w http.ResponseWriter,r *http.Request) {
-	//获取吧名
-	barName := r.PostFormValue("barName")
-	//修改贴吧状态
-	dao.SetBarStatusByBarName(barName, 1)
-
-	//将该消息删除
-	dao.DeleteCreateBarMessageByBarName(barName)
-	_,_ = w.Write([]byte("同意创建贴吧！"))
 }
 
 //GetMyBar 查看我的贴吧
 func GetMyBar(w http.ResponseWriter,r * http.Request){
 	//获取当前用户
 	_,sess:= dao.IsLogin(r)
-
 	//调用数据库查看属于我创建的贴吧和我关注的贴吧
 	mybar := dao.GetBarsByUserID(sess.UserID)
-
 	//发送给页面
 	t := template.Must(template.ParseFiles("views/pages/bar/mybar.html"))
 	_ = t.Execute(w,mybar)
-
 }
 
 //GoToBar 进入贴吧
@@ -98,21 +82,16 @@ func GoToBar(w http.ResponseWriter,r *http.Request){
 	barName := r.FormValue("barName")
 	//调用数据库根据吧名查看吧的信息
 	bar := dao.FindBarByBarNameAndKind(barName)
-
 	//获取吧主信息
 	barOwner := dao.FindUserByUserID(bar.BarHostID)
-
 	bar.BarHostName = barOwner.UserName
 	//获取该吧的公告
 	bar.MyNotice = dao.FindNoticesByBarName(bar.BarName)
-
 	//获取该吧的帖子
 	posts := dao.FindCreatePostsByBarName(bar.BarName)
-
 	//为了符合page中bar的数据类型，将bar添加到切片中
 	var bars []*model.Bar
 	bars = append(bars,bar)
-
 	//将所有信息添加到page中
 	page := &model.Page{
 		Posts: posts,
@@ -143,8 +122,7 @@ func GoToBar(w http.ResponseWriter,r *http.Request){
 		}
 		page.User = user
 		//将访问贴吧的信息存储到历史记录表中
-		 dao.AddBarHistory(barName,user.UserID)
-
+		dao.AddBarHistory(barName,user.UserID)
 
 	} else {
 		//若未登录
@@ -157,17 +135,31 @@ func GoToBar(w http.ResponseWriter,r *http.Request){
 
 }
 
-//LikedBar 关注贴吧
-func LikedBar(w http.ResponseWriter,r *http.Request){
-	//判断是否登录了
+//IsLikedBar 是否关注贴吧
+func IsLikedBar(w http.ResponseWriter,r *http.Request){
+	//获取吧名和判断
+	barName := r.PostFormValue("barName")
+	bar := dao.FindBarByBarNameAndKind(barName)
+	kind := r.PostFormValue("kind")
 	judge,sess := dao.IsLogin(r)
+
+	//取消关注
+	if kind == "disliked" {
+		//调用数据库删除该条信息
+		dao.DisLikedBar(barName,sess.UserID)
+		//修改该把的粉丝信息
+		bar.TotalFan--
+		dao.SetTotalFanByBarName(bar.TotalFan,bar.BarName)
+		_, _ = w.Write([]byte("已取消关注！"))
+		return
+	}
+
+	//关注
+	//判断是否登录了
 	//若未登录，则发送给前端未登录的信息
 	if judge == false {
 		_, _ = w.Write([]byte("请先登录！"))
 	} else {
-		barName := r.PostFormValue("barName")
-		//获取该吧信息
-		bar := dao.FindBarByBarNameAndKind(barName)
 		bar.BarHostID = sess.UserID
 		bar.Kind = "liked"
 		//调用数据库添加关注bars信息
@@ -177,20 +169,6 @@ func LikedBar(w http.ResponseWriter,r *http.Request){
 		dao.SetTotalFanByBarName(bar.TotalFan,bar.BarName)
 		_, _ = w.Write([]byte("成功关注！"))
 	}
-}
-
-//DisLikedBar 取消关注贴吧
-func DisLikedBar(w http.ResponseWriter,r *http.Request){
-	//获取吧名当前用户
-	barName := r.PostFormValue("barName")
-	bar := dao.FindBarByBarNameAndKind(barName)
-	_,sess := dao.IsLogin(r)
-	//调用数据库删除该条信息
-	dao.DisLikedBar(barName,sess.UserID)
-	//修改该把的粉丝信息
-	bar.TotalFan--
-	dao.SetTotalFanByBarName(bar.TotalFan,bar.BarName)
-	_, _ = w.Write([]byte("已取消关注！"))
 }
 
 //FindBarsAndPosts 搜索贴吧和帖子
@@ -207,44 +185,48 @@ func FindBarsAndPosts(w http.ResponseWriter,r *http.Request){
 	_ = t.Execute(w,page)
 }
 
-/*
-//PostsOrderByTimeInBar 在吧内根据时间将帖子排序
-func PostsOrderByTimeInBar(w http.ResponseWriter,r *http.Request){
-	//获取吧名
-	barName := r.PostFormValue("orderBarName")
-	//调用数据库根据吧名查看吧的信息
-	bar := dao.FindBarByBarName(barName)
-	//查看是否登录
-	judge,sess := dao.IsLogin(r)
-
-
-}
-
- */
-
-//DeleteBarHistory 删除贴吧访问记录
-func DeleteBarHistory(w http.ResponseWriter,r *http.Request){
+//DeleteBarOrPostHistory 删除贴吧或帖子访问记录
+func DeleteBarOrPostHistory(w http.ResponseWriter,r *http.Request){
 	//获取当前用户
 	_,sess := dao.IsLogin(r)
 	barName := r.FormValue("barName")
 	time := r.FormValue("time")
-	dao.DeleteBarHistory(barName,sess.UserID,time)
+	title := r.FormValue("title")
+	kind := r.FormValue("kind")
+
+	if kind == "bar" {
+		dao.DeleteBarHistory(barName,sess.UserID,time)
+	} else {
+		dao.DeletePostHistory(barName,title,sess.UserID,time)
+	}
 	//回到足迹页面
 	LookHistory(w,r)
 }
 
-//ReportBar 举报贴吧
-func ReportBar(w http.ResponseWriter,r *http.Request){
-	//获取吧名
+//ReportBarOrPost 举报贴吧或帖子
+func ReportBarOrPost(w http.ResponseWriter,r *http.Request){
+	//获取信息
 	barName := r.PostFormValue("barName")
-	//查看该吧是否被举报过
-	id := dao.FindReportBarByBarName(barName)
-	if id <= 0 {
-		//还未被举报则增加举报信息
-		dao.AddReportBarMessage(barName)
+	title := r.PostFormValue("title")
+	kind := r.PostFormValue("kind")
+
+	//举报贴吧
+	if kind == "bar" {
+		//查看该吧是否被举报过
+		id := dao.FindReportBarByBarName(barName)
+		if id <= 0 {
+			//还未被举报则增加举报信息
+			dao.AddReportBarMessage(barName)
+		}
+	} else {
+		//查看该帖子是否被举报过
+		id := dao.FindReportPostByBarNameAndTitle(barName,title)
+		if id <= 0 {
+			//还未被举报过
+			dao.AddReportPostMessage(barName,title)
+		}
 	}
 	_,_ = w.Write([]byte("举报成功！"))
-
 }
 
 //BannedBar 封禁贴吧
@@ -253,7 +235,7 @@ func BannedBar(w http.ResponseWriter,r *http.Request){
 	barName := r.FormValue("barName")
 	//查找该吧下的帖子
 	posts := dao.FindCreatePostsByBarName(barName)
-	//遍历帖子，将帖子status设置为0
+	//遍历帖子，将帖子status设置为z0
 	for _,v := range posts{
 		dao.DeletePostFake(v.BarName,v.PostTitle,0)
 	}

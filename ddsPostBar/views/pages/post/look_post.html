@@ -91,10 +91,11 @@
                 //获取吧名和帖子标题
                 let barName = $('#barName').val();
                 let title = $('#postTitle').val();
-                let url = "/reportPost";
+                let url = "/reportBarOrPost"
                 let param = {
                     "barName":barName,
-                    "title":title
+                    "title":title,
+                    "kind":"post"
                 };
                 $.post(url,param,function (res) {
                     //将响应信息设置到span元素

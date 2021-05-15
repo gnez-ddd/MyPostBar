@@ -16,54 +16,48 @@ func PostCreate(w http.ResponseWriter,r *http.Request){
 	//若未登录
 	if judge == false {
 		_, _ = w.Write([]byte("请先登录！"))
+		return
+	}
+
+	//获取贴吧名当前用户内容标题
+	barName := r.PostFormValue("barName")
+	content := r.PostFormValue("content")
+	title := r.PostFormValue("title")
+	user := dao.FindUserByUserID(sess.UserID)
+	//验证标题是否存在
+	post := dao.FindCreatePostByBarNameAndTitle(barName,title)
+
+	//若存在
+	if post.PostID > 0 {
+		_, _ = w.Write([]byte("该标题已存在！"))
 	} else {
+		//将内容存放进文件夹中
+		postPath := "views/static/post/" + barName + title + ".txt"
+		file,_ := os.OpenFile("views/static/post/" + barName + title + ".txt" ,os.O_CREATE | os.O_APPEND,0666)
 
-		//获取贴吧名当前用户内容标题
-		barName := r.PostFormValue("barName")
-		content := r.PostFormValue("content")
-		title := r.PostFormValue("title")
-		user := dao.FindUserByUserID(sess.UserID)
+		defer file.Close()
+		_,_ = file.WriteString(content)
 
+		//将吧名当前用户时间内容路径标题存放进数据库中
+		dao.AddPost(barName,user.UserID,title,postPath)
 
-		//验证标题是否存在
-		post := dao.FindCreatePostByBarNameAndTitle(barName,title)
-
-		//若存在
-		if post.PostID > 0 {
-			_, _ = w.Write([]byte("该标题已存在！"))
-
-		} else {
-			//将内容存放进文件夹中
-			postPath := "views/static/post/" + barName + title + ".txt"
-			file,_ := os.OpenFile("views/static/post/" + barName + title + ".txt" ,os.O_CREATE | os.O_APPEND,0666)
-
-			defer file.Close()
-			_,_ = file.WriteString(content)
-
-			//将吧名当前用户时间内容路径标题存放进数据库中
-			dao.AddPost(barName,user.UserID,title,postPath)
-
-			_, _ = w.Write([]byte("发贴成功！"))
-
-		}
+		_, _ = w.Write([]byte("发贴成功！"))
 	}
 }
+
 
 //GetMyPosts 查看创建和关注和删除和被删除的贴子
 func GetMyPosts(w http.ResponseWriter,r *http.Request){
 	//获取用户
 	_,sess := dao.IsLogin(r)
-
 	user := dao.FindUserByUserID(sess.UserID)
 
 	//调用数据库根据用户名和种类查看创建和关注和删除的帖子
 	myPosts := dao.FindPostsByUserIDAndKind(sess.UserID)
 
-
 	//若该用户为系统管理员，则查找所有被删除的帖子
 	if user.UserName == "admin" {
 		myPosts.PostDelete = dao.FindAllDeletePosts()
-
 	}
 
 	t := template.Must(template.ParseFiles("views/pages/post/my_post.html"))
@@ -134,7 +128,6 @@ func DeletePostFake(w http.ResponseWriter,r *http.Request){
 	} else {
 		//去我的帖子
 		GetMyPosts(w,r)
-
 	}
 }
 
@@ -145,7 +138,6 @@ func DisDeletePost(w http.ResponseWriter,r *http.Request){
 	postTitle := r.PostFormValue("title")
 	//获取给吧的状态
 	status := dao.FindBarStatusByBarNameAndKind(barName)
-
 	//若该吧存在
 	if status == true {
 		//修改信息
@@ -154,7 +146,6 @@ func DisDeletePost(w http.ResponseWriter,r *http.Request){
 	} else {
 		_,_ = w.Write([]byte("恢复失败！"))
 	}
-
 }
 
 //GoToPost 去看帖子
@@ -169,12 +160,9 @@ func GoToPost(w http.ResponseWriter,r *http.Request){
 	//根据发帖者id查看发帖者项目
 	owner := dao.FindUserByUserID(post.PostHostID)
 	post.PostHostName = owner.UserName
-
 	//获取帖子内容
 	bytes,_ := ioutil.ReadFile(post.PostContent)
-
 	post.PostContent = string(bytes)
-
 	//根据吧名和帖子标题获取帖子的回复内容按时间降序排序
 	post.Reply = dao.FindReplyByBarNameAndTitleOrderByTime(barName,postTitle)
 
@@ -202,17 +190,13 @@ func GoToPost(w http.ResponseWriter,r *http.Request){
 	//若用户已经登录
 	if judge == true {
 		user := dao.FindUserByUserID(sess.UserID)
-
 		//判断帖子是否点赞了
 		post.IsThumb = dao.IsPostThumbByBarNameAndUserIDAndKind(barName,user.UserID,postTitle)
-
 		//判断帖子是否收藏了
 		post.IsLiked = dao.IsPostLikedByBarNameAndUserID(barName,user.UserID,postTitle)
-
 		//将访问帖子信息存储到历史信息表中
 		dao.AddPostHistory(barName,postTitle,user.UserID)
 	}
-
 	t := template.Must(template.ParseFiles("views/pages/post/look_post.html"))
 	_ = t.Execute(w,post)
 }
@@ -300,8 +284,6 @@ func ToReplyUserInPostPage(w http.ResponseWriter,r *http.Request){
 func GetUserReply(w http.ResponseWriter,r *http.Request){
 	//是否登录
 	judge,sess := dao.IsLogin(r)
-
-
 	//若未登录
 	if judge == false {
 		_,_ = w.Write([]byte("请先登录！"))
@@ -332,31 +314,25 @@ func GetUserReply(w http.ResponseWriter,r *http.Request){
 func PostIsThumb(w http.ResponseWriter,r *http.Request){
 	//是否登录
 	judge,sess := dao.IsLogin(r)
-
 	//若未登录
 	if judge == false {
 		_,_ = w.Write([]byte("请先登录！"))
-	} else {
-		//获取吧名帖子名当前用户与是否点赞
-		barName := r.PostFormValue("barName")
-		title := r.PostFormValue("title")
-		isThumb := r.PostFormValue("judge")
-		user := dao.FindUserByUserID(sess.UserID)
-		if isThumb == "1" {
-			//要点赞
-			//增加一个点赞的项
-			dao.ThumbPost(barName,user.UserID,title)
-
+		return
+	}
+	//获取吧名帖子名当前用户与是否点赞
+	barName := r.PostFormValue("barName")
+	title := r.PostFormValue("title")
+	isThumb := r.PostFormValue("judge")
+	user := dao.FindUserByUserID(sess.UserID)
+	if isThumb == "1" {
+		//要点赞增加一个点赞的项
+		dao.ThumbPost(barName,user.UserID,title)
 			_,_ = w.Write([]byte("成功点赞！"))
-
-		} else {
-			//取消点赞
-			//将原先点赞的项删除
-			dao.DisThumbPost(barName,user.UserID,title)
-
-			_,_ = w.Write([]byte("已取消点赞！"))
-
-		}
+	} else {
+		//取消点赞
+		//将原先点赞的项删除
+		dao.DisThumbPost(barName,user.UserID,title)
+		_,_ = w.Write([]byte("已取消点赞！"))
 	}
 }
 
@@ -367,37 +343,25 @@ func PostIsLiked(w http.ResponseWriter,r *http.Request){
 	//若未登录
 	if judge == false {
 		_,_ = w.Write([]byte("请先登录！"))
-	} else {
-		//获取吧名帖子名用户和是否收藏
-		barName := r.PostFormValue("barName")
-		title := r.PostFormValue("title")
-		user := dao.FindUserByUserID(sess.UserID)
-		kind := r.PostFormValue("kind")
-
-		if kind == "liked" {
-			//收藏
-			//添加一个收藏的项
-			dao.LikedPost(barName,user.UserID,title)
-			_,_ = w.Write([]byte("成功收藏！"))
-
-		} else {
-			//取消收藏
-			//将原先收藏的项删除
-			dao.DisLikedPost(barName,user.UserID,title)
-			_,_ = w.Write([]byte("已取消收藏！"))
-		}
+		return
 	}
-}
+	//获取吧名帖子名用户和是否收藏
+	barName := r.PostFormValue("barName")
+	title := r.PostFormValue("title")
+	user := dao.FindUserByUserID(sess.UserID)
+	kind := r.PostFormValue("kind")
 
-//DeletePostHistory 删除访问帖子记录
-func DeletePostHistory(w http.ResponseWriter,r *http.Request){
-	//获取当前用户
-	_,sess := dao.IsLogin(r)
-	barName := r.FormValue("barName")
-	title := r.FormValue("title")
-	time := r.FormValue("time")
-	dao.DeletePostHistory(barName,title,sess.UserID,time)
-	LookHistory(w,r)
+	if kind == "liked" {
+		//收藏
+		//添加一个收藏的项
+		dao.LikedPost(barName,user.UserID,title)
+		_,_ = w.Write([]byte("成功收藏！"))
+	} else {
+		//取消收藏
+		//将原先收藏的项删除
+		dao.DisLikedPost(barName,user.UserID,title)
+		_,_ = w.Write([]byte("已取消收藏！"))
+	}
 }
 
 //ApplicationToRecoverPost 申请恢复帖子
@@ -407,21 +371,16 @@ func ApplicationToRecoverPost(w http.ResponseWriter,r *http.Request){
 	title := r.PostFormValue("title")
 	//获取当前用户
 	_,sess := dao.IsLogin(r)
-
 	//查看是否已经发送过
 	id := dao.FindPostApplicationToRecoverMessageByBarNameAndTitle(barName,title)
-
 	if id <= 0 {
 		//若未发送过
 		//获取该吧吧主id
 		receiverID := dao.FindBarOwnerIDByBarNameAndKind(barName)
-
 		//向吧主发送申请恢复
 		dao.AddPostApplicationToRecoverMessage(barName,title,sess.UserID,receiverID)
-
 	}
 	_,_ = w.Write([]byte("已成功发送申请！"))
-
 }
 
 //DisAgreeToRecoverPost 拒绝申请恢复帖子
@@ -455,19 +414,7 @@ func AgreeToRecoverPost(w http.ResponseWriter,r *http.Request){
 	}
 }
 
-//ReportPost 举报帖子
-func ReportPost(w http.ResponseWriter,r *http.Request){
-	//获取吧名和标题
-	barName := r.PostFormValue("barName")
-	title := r.PostFormValue("title")
-	//查看该帖子是否被举报过
-	id := dao.FindReportPostByBarNameAndTitle(barName,title)
-	if id <= 0 {
-		//还未被举报过
-		dao.AddReportPostMessage(barName,title)
-	}
-	_,_ = w.Write([]byte("举报成功！"))
-}
+
 
 //BannedPost 封禁帖子
 func BannedPost(w http.ResponseWriter,r *http.Request){

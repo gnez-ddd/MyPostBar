@@ -16,161 +16,115 @@ import (
 
 // UserRegist 用户注册处理器
 func UserRegist(w http.ResponseWriter,r *http.Request){
-	//获取用户名密码邮箱
+	//获取用户名密码邮箱验证码
 	username := r.PostFormValue("username")
 	psw := r.PostFormValue("password")
 	email := r.PostFormValue("email")
+	codeInput := r.PostFormValue("codeInput")
 
-	//调用数据库检测该用户名是否注册过
-	user := dao.FindUserByUserName(username)
-	//若用户名存在
-	if user.UserID > 0 {
+	//调用数据库检测该用户名邮箱是否注册
+	user1 := dao.FindUserByUserName(username)
+	user2 := dao.FindUserByEmail(email)
+	//判断验证码是否正确
+	code := dao.FindCodeNumByEmail(email)
+	//若用户名存在或邮箱存在或验证码不正确
+	if user1.UserID > 0 || user2.UserID > 0 || codeInput != code{
 		//去注册页面发送用户名已存在的信息
 		t := template.Must(template.ParseFiles("views/pages/user/regist.html"))
-		_ = t.Execute(w,"用户名已存在！")
-	}
-	//调用数据库检测该邮箱是否注册过
-	user = dao.FindUserByEmail(email)
-	//若邮箱存在
-	if user.UserID > 0 {
-		//去注册页面发送邮箱已存在的信息
-		t := template.Must(template.ParseFiles("views/pages/user/regist.html"))
-		_ = t.Execute(w,"邮箱已存在！")
-	}
-
-	//判断验证码与邮箱是否同时正确
-	code := dao.FindCodeNumByEmail(email)
-	//获取用户输入的验证码
-	codeInput := r.PostFormValue("codeInput")
-	if codeInput != code {
-		t := template.Must(template.ParseFiles("views/pages/user/regist.html"))
-		_ = t.Execute(w,"验证码错误！")
+		_ = t.Execute(w,"用户名或邮箱已存在或验证码不正确！")
+		return
 	}
 
 	//若一切都可以则将验证码表中对应邮箱验证码设置为空
 	dao.SetCodeNumNil(email)
-	//注册该用户，将信息保存在数据库中,并去往注册成功页面并提示几秒后去往登录页面
+	//注册该用户，将信息保存在数据库中,并去往注册成功页面
 	//获取盐和密文
 	salt := model.GetSalt()
 	PSW := model.GetPBKDF2(psw,salt)
-
 	dao.AddUser(username,PSW,email,salt)
 	t := template.Must(template.ParseFiles("views/pages/user/regist_success.html"))
 	_ = t.Execute(w,"成功注册！")
 }
 
-
 // UserLogin 用户登录处理器
 func UserLogin(w http.ResponseWriter,r *http.Request){
-		//获取用户名密码验证码
-		username := r.PostFormValue("username")
-		psw := r.PostFormValue("password")
-		codeInput := r.PostFormValue("codeInput")
+	//获取用户名密码验证码
+	username := r.PostFormValue("username")
+	psw := r.PostFormValue("password")
+	codeInput := r.PostFormValue("codeInput")
 
-		//查找有无该用户
-		user1 := dao.FindUserByUserName(username)
+	//查找有无该用户
+	user := dao.FindUserByUserName(username)
+	//若用户不存在或用户被封禁
+	if user.UserID <= 0 || user.Status == 0 {
+		t := template.Must(template.ParseFiles("views/pages/user/login.html"))
+		_ = t.Execute(w, "用户名或密码错误！")
+		return
+	}
 
-		//若用户不存在或用户被封禁
-		if user1.UserID <= 0 || user1.Status == 0 {
-			t := template.Must(template.ParseFiles("views/pages/user/login.html"))
-			_ = t.Execute(w, "用户名或密码错误！")
-		} else {
-			//用户存在
-			//判断验证码是否正确
-			code := dao.FindCodeNumByEmail(user1.Email)
-
-			if code != codeInput{
-				t := template.Must(template.ParseFiles("views/pages/user/login.html"))
-				_ = t.Execute(w,"验证码错误！")
-			} else {
-				//若一切都可以则将验证码表中对应邮箱验证码设置为空
-				dao.SetCodeNumNil(user1.Email)
-
-				//查看该用户的盐
-				salt := dao.FindSaltByUserID(user1.UserID)
-
-				//获取用户输入密码的密文
-				PSW := model.GetPBKDF2(psw,salt)
-
-				//调用数据库判断用户名与密码是否正确
-				user := dao.CheckUserNameAndPassWord(username,PSW)
-
-
-				//若用户名与密码不正确，则停留在登录页面并发送错误的信息
-				if user.UserID <= 0 {
-					t := template.Must(template.ParseFiles("views/pages/user/login.html"))
-					_ = t.Execute(w, "用户名或密码错误！")
-				} else {
-					//用户名与密码正确
-					//生成UUID作为session的id
-					uuid := utils.CreateUUID()
-
-					//建立一个session
-					sess := &model.Session{
-						SessionID: uuid,
-						UserName: user.UserName,
-						UserID: user.UserID,
-					}
-
-					//将session保存在数据库中
-					dao.AddSession(sess)
-
-
-					//创建一个Cookie与Session相关联
-					cookie := http.Cookie{
-						Name:"userhandler",
-						Value:uuid,
-						HttpOnly: true,
-					}
-					//将cookie发送给浏览器并去往首页
-					http.SetCookie(w,&cookie)
-					//去登录成功页面
-					t := template.Must(template.ParseFiles("views/pages/user/login_success.html"))
-					_ = t.Execute(w,"")
-				}
-			}
+	//用户存在
+	//判断验证码账号密码是否正确
+	code := dao.FindCodeNumByEmail(user.Email)
+	//利用用户的盐获取用户输入密码的密文
+	PSW := model.GetPBKDF2(psw,user.Salt)
+	//判断
+	if code != codeInput || PSW != user.PassWord{
+		t := template.Must(template.ParseFiles("views/pages/user/login.html"))
+		_ = t.Execute(w,"验证码或密码错误！")
+	} else {
+		//若一切都可以则将验证码表中对应邮箱验证码设置为空
+		dao.SetCodeNumNil(user.Email)
+		//生成UUID作为session的id
+		uuid := utils.CreateUUID()
+		//建立一个session
+		sess := &model.Session{
+			SessionID: uuid,
+			UserName: user.UserName,
+			UserID: user.UserID,
 		}
+		//将session保存在数据库中
+		dao.AddSession(sess)
+		//创建一个Cookie与Session相关联
+		cookie := http.Cookie{
+			Name:"userhandler",
+			Value:uuid,
+			HttpOnly: true,
+		}
+		//将cookie发送给浏览器并去往首页
+		http.SetCookie(w,&cookie)
+		//去登录成功页面
+		t := template.Must(template.ParseFiles("views/pages/user/login_success.html"))
+		_ = t.Execute(w,"")
+	}
 }
 
 // FindPassWord 用户密码找回处理器
 func FindPassWord(w http.ResponseWriter,r *http.Request){
-	//获取邮箱
+	//获取邮箱及验证码
 	email := r.PostFormValue("email")
+	codeInput := r.PostFormValue("codeInput")
+	code := dao.FindCodeNumByEmail(email)
 	//根据邮箱查找用户
 	user := dao.FindUserByEmail(email)
 
-	//若该用户存在且不被封禁,则获取用户输入的验证码与邮箱进行判断
-	if user.UserID > 0 && user.Status == 1 {
-		codeInput := r.PostFormValue("codeInput")
-		code := dao.FindCodeNumByEmail(email)
-
-		//若不正确则继续停留在找回密码页面
-		if codeInput != code {
-			t := template.Must(template.ParseFiles("views/pages/user/find_password.html"))
-			_ = t.Execute(w,"验证码错误！")
-			return
-		} else {
-			//若一切都可以则将验证码表中对应邮箱验证码设置为空
-			dao.SetCodeNumNil(email)
-			//若正确则修改密码并前往修改成功页面
-			//获取密码
-			password := r.PostFormValue("password")
-			//获取盐值
-			salt := model.GetSalt()
-			//获取密文
-			PSW := model.GetPBKDF2(password,salt)
-
-			//调用数据库修改密码和盐值
-			dao.SetPassword(PSW,email,salt)
-			t := template.Must(template.ParseFiles("views/pages/user/find_password_success.html"))
-			_ = t.Execute(w,"")
-			return
-		}
-	} else {
-		//若用户不存在则停留在找回密码页面
+	//如果用户不存在或验证码输入错误
+	if user.UserID <= 0 || user.Status == 0 || codeInput != code {
 		t := template.Must(template.ParseFiles("views/pages/user/find_password.html"))
-		_ = t.Execute(w,"该用户不存在！")
-		return
+		_ = t.Execute(w,"验证码错误或该用户不存在！")
+	} else {
+		//若一切都可以则将验证码表中对应邮箱验证码设置为空
+		dao.SetCodeNumNil(email)
+		//获取密码
+		password := r.PostFormValue("password")
+		//获取盐值
+		salt := model.GetSalt()
+		//获取密文
+		PSW := model.GetPBKDF2(password,salt)
+
+		//调用数据库修改密码和盐值
+		dao.SetPassword(PSW,email,salt)
+		t := template.Must(template.ParseFiles("views/pages/user/find_password_success.html"))
+		_ = t.Execute(w,"")
 	}
 }
 
@@ -188,13 +142,10 @@ func ShowUserInformation(w http.ResponseWriter,r *http.Request){
 func ToProveUserPage(w http.ResponseWriter,r *http.Request){
 	//获取当前登录的用户
 	_,sess := dao.IsLogin(r)
-
 	//根据sessid查找当前用户
 	user := dao.FindUserByUserID(sess.UserID)
-
 	t := template.Must(template.ParseFiles("views/pages/user/prove_user.html"))
 	_ = t.Execute(w,user)
-
 }
 
 // ProveUser 用户身份验证
@@ -204,7 +155,7 @@ func ProveUser(w http.ResponseWriter,r *http.Request){
 	//根据sessid查找当前用户
 	user := dao.FindUserByUserID(sess.UserID)
 
-	//获取密码码
+	//获取用户输入密码
 	password := r.PostFormValue("password")
 	//根据用户的盐值生成密文查看是否与用户密文相同
 	psw := model.GetPBKDF2(password,user.Salt)
@@ -223,14 +174,12 @@ func ProveUser(w http.ResponseWriter,r *http.Request){
 func SetUserInformation(w http.ResponseWriter,r *http.Request){
 	//获取当前登录的用户
 	_,sess := dao.IsLogin(r)
-	//根据sessid查找当前用户
-	user := dao.FindUserByUserID(sess.UserID)
-
-
 	//获取用户输入的验证码与邮箱
 	codeInput := r.PostFormValue("codeInput")
 	email := r.PostFormValue("newEmail")
 	code := dao.FindCodeNumByEmail(email)
+	//根据sessid查找当前用户
+	user := dao.FindUserByUserID(sess.UserID)
 
 	if email != "" && codeInput != "" {
 		//判断用户名与邮箱是否正确
@@ -294,20 +243,17 @@ func ToIndexPage(w http.ResponseWriter,r *http.Request){
 	page := model.Page{}
 	//获取贴吧
 	page.Bar = dao.GetAllBars()
-
 	//获取帖子
 	page.Posts = dao.GetAllCreatePostOrderByExperience()
-
 	//判断是否已经登录
 	judge,sess := dao.IsLogin(r)
-
 
 	//若已经登录,则获取用户
 	if judge == true {
 		page.IsLogin = true
 		page.User = dao.FindUserByUserID(sess.UserID)
-
 		page.User.IsLogin = true
+
 		//判断用户是否已经签到了
 		//获取当前时间
 		tm := time.Now()
@@ -318,7 +264,6 @@ func ToIndexPage(w http.ResponseWriter,r *http.Request){
 
 		t := template.Must(template.ParseFiles("views/userIndex.html"))
 		_ = t.Execute(w,page)
-
 
 	} else {
 		//若为游客前往首页
@@ -344,33 +289,26 @@ func UserLogout(w http.ResponseWriter,r *http.Request){
 	ToIndexPage(w,r)
 }
 
-//CheckUserName 通过发送Ajax验证用户名是否可用
-func CheckUserName(w http.ResponseWriter, r *http.Request) {
-	//获取用户输入的用户名
-	username := r.PostFormValue("username")
-	//调用userdao中验证用户名和密码的方法
-	user := dao.FindUserByUserName(username)
-	if user.UserID > 0 {
-		//用户名已存在
-		_, _ = w.Write([]byte("用户名已存在！"))
+//CheckUserNameOrEmail 通过发送Ajax验证用户名或验证码是否可用
+func CheckUserNameOrEmail(w http.ResponseWriter, r *http.Request) {
+	//获取用户输入的要检查的信息
+	check := r.PostFormValue("check")
+	kind := r.PostFormValue("kind")
+	var user *model.Users
+	//查询有无用户
+	if kind == "userName" {
+		user = dao.FindUserByUserName(check)
 	} else {
-		//用户名可用
-		_, _ = w.Write([]byte("<font >用户名可用！</font>"))
+		user = dao.FindUserByEmail(check)
 	}
-}
 
-//CheckEmail 通过发送Ajax验证邮箱是否可用
-func CheckEmail(w http.ResponseWriter, r *http.Request) {
-	//获取用户输入的用户名
-	email := r.PostFormValue("email")
-	//调用userdao中验证用户名和密码的方法
-	user := dao.FindUserByEmail(email)
+	//若存在
 	if user.UserID > 0 {
-		//用户名已存在
-		_, _ = w.Write([]byte("邮箱已存在！"))
+		//已存在
+		_, _ = w.Write([]byte("已存在！"))
 	} else {
 		//用户名可用
-		_, _ = w.Write([]byte("<font >邮箱可用！</font>"))
+		_, _ = w.Write([]byte("<font >可用！</font>"))
 	}
 }
 
@@ -378,7 +316,6 @@ func CheckEmail(w http.ResponseWriter, r *http.Request) {
 func LookHistory(w http.ResponseWriter,r *http.Request){
 	//获取当前用户
 	_,sess := dao.IsLogin(r)
-
 	//调用数据库查看其访问过的贴吧
 	bars := dao.FindHistoryBarsByUserID(sess.UserID)
 	//调用数据库查看其访问过的帖子
@@ -389,7 +326,6 @@ func LookHistory(w http.ResponseWriter,r *http.Request){
 	}
 	t := template.Must(template.ParseFiles("views/pages/historyLook/history_look.html"))
 	_ = t.Execute(w,page)
-
 }
 
 //SignIn 签到

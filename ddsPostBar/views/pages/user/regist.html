@@ -76,9 +76,12 @@
                 //获取用户输入的用户名
                 let username = $(this).val();
                 //设置请求地址
-                let url = "/checkUserName";
+                let url = "/checkUserNameOrEmail";
                 //设置请求参数
-                let param = {"username":username};
+                let param = {
+                    "check":username,
+                    "kind":"userName"
+                };
                 //发送Ajax请求
                 $.post(url,param,function (res) {
                     //将显示提示信息的span元素显示
@@ -93,9 +96,12 @@
                 //获取用户输入的用户名
                 let email = $(this).val();
                 //设置请求地址
-                let url = "/checkEmail";
+                let url = "/checkUserNameOrEmail";
                 //设置请求参数
-                let param = {"email":email};
+                let param = {
+                    "check":email,
+                    "kind":"email"
+                };
                 //发送Ajax请求
                 $.post(url,param,function (res) {
                     //将显示提示信息的span元素显示

@@ -23,7 +23,7 @@
       日期：
       <input class="itxt" type="text" value={{.Time}} name="lookBarTime" id="lookBarTime" disabled="disabled"/>
       &nbsp;&nbsp;&nbsp;
-      <a href="/deleteBarHistory?barName={{.BarName}}&time={{.Time}}" class="delete">删除改记录</a>
+      <a href="/deleteBarOrPostHistory?barName={{.BarName}}&title=nil&time={{.Time}}&kind=bar" class="delete">删除改记录</a>
       <br/>
       {{end}}
     </div>
@@ -36,7 +36,7 @@
       日期：
       <input class="itxt" type="text" value={{.PostDate}} name="lookPostTime" id="lookPostTime" disabled="disabled"/>
       &nbsp;&nbsp;&nbsp;
-      <a href="/deletePostHistory?barName={{.BarName}}&title={{.PostTitle}}&time={{.PostDate}}" class="delete">删除改记录</a>
+      <a href="/deleteBarOrPostHistory?barName={{.BarName}}&title={{.PostTitle}}&time={{.PostDate}}&kind=post" class="delete">删除改记录</a>
       <br/>
       {{end}}
     </div>

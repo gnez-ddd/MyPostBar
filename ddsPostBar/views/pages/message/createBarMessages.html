@@ -14,9 +14,12 @@
                     //同意创建贴吧
                     //获取吧名
                     let barName = $(this).attr("id");
-                    let url = "/agreeToCreateBar";
+                    let url = "/isAgreeToCreateBar";
                     //设置请求参数
-                    let param = {"barName":barName};
+                    let param = {
+                        "barName":barName,
+                        "kind":"agree"
+                    };
                     //发送Ajax请求
                     $.post(url,param,function () {
                     });
@@ -25,9 +28,12 @@
                     //不同意创建贴吧
                     //获取吧名
                     let barName = $(this).attr("id");
-                    let url = "/disagreeToCreateBar";
+                    let url = "/isAgreeToCreateBar";
                     //设置请求参数
-                    let param = {"barName":barName};
+                    let param = {
+                        "barName":barName,
+                        "kind":"disagree"
+                    };
                     //发送Ajax请求
                     $.post(url,param,function () {
                     });

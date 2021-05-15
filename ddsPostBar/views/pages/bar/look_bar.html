@@ -11,8 +11,12 @@
             $('#reportBar').click(function () {
                 //获取吧名
                 let barName = $('#barName').val();
-                let url = "/reportBar"
-                let param = {"barName":barName};
+                let url = "/reportBarOrPost"
+                let param = {
+                    "barName":barName,
+                    "title":null,
+                    "kind":"bar"
+                };
                 $.post(url,param,function (res) {
                     //将响应信息设置到span元素
                     $("#msg").html(res);
@@ -26,8 +30,11 @@
             $('#likedBar').click(function () {
                 //获取该吧名
                 let barName = $('#likedBar').val();
-                let url = "/likedBar";
-                let param={"barName":barName};
+                let url = "/isLikedBar";
+                let param={
+                    "barName":barName,
+                    "kind":"liked"
+                };
                 $.post(url,param,function (res) {
                     //将响应信息设置到span元素
                     $("#msg").html(res);
@@ -44,7 +51,10 @@
                 //获取该吧名
                 let barName = $('#disLikedBar').val();
                 let url = "/disLikedBar";
-                let param={"barName":barName};
+                let param={
+                    "barName":barName,
+                    "kind":"disliked"
+                };
                 $.post(url,param,function (res) {
                     //将响应信息设置到span元素
                     $("#msg").html(res);

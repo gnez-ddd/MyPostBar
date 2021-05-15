@@ -56,17 +56,12 @@ func main(){
 	//查看申请创建贴吧信息
 	http.HandleFunc("/getCreateBarMessages",controller.GetCreateBarMessages)
 
-	//同意创建贴吧
-	http.HandleFunc("/agreeToCreateBar",controller.AgreeToCreateBar)
+	//是否同意创建贴吧
+	http.HandleFunc("/isAgreeToCreateBar",controller.IsAgreeToCreateBar)
 
-	//不同意创建贴吧
-	http.HandleFunc("/disagreeToCreateBar",controller.DisagreeToCreateBar)
+	//是否关注贴吧
+	http.HandleFunc("/isLikedBar",controller.IsLikedBar)
 
-	//关注贴吧
-	http.HandleFunc("/likedBar",controller.LikedBar)
-
-	//取消关注贴吧
-	http.HandleFunc("/disLikedBar",controller.DisLikedBar)
 
 	//创建帖子
 	http.HandleFunc("/postCreate",controller.PostCreate)
@@ -116,11 +111,9 @@ func main(){
 	//获取历史记录
 	http.HandleFunc("/lookHistory",controller.LookHistory)
 
-	//删除贴吧访问记录
-	http.HandleFunc("/deleteBarHistory",controller.DeleteBarHistory)
+	//删除贴吧或帖子访问记录
+	http.HandleFunc("/deleteBarOrPostHistory",controller.DeleteBarOrPostHistory)
 
-	//删除访问帖子记录
-	http.HandleFunc("/deletePostHistory",controller.DeletePostHistory)
 
 	//去查看信息页面
 	http.HandleFunc("/toGetMessagesPage",controller.ToGetMessagesPage)
@@ -137,11 +130,10 @@ func main(){
 	//去签到
 	http.HandleFunc("/signIn",controller.SignIn)
 
-	//举报贴吧
-	http.HandleFunc("/reportBar",controller.ReportBar)
+	//举报贴吧或帖子
+	http.HandleFunc("/reportBarOrPost",controller.ReportBarOrPost)
 
-	//举报帖子
-	http.HandleFunc("/reportPost",controller.ReportPost)
+
 
 	//获取举报消息
 	http.HandleFunc("/getReportMessage",controller.GetReportMessage)
@@ -191,11 +183,8 @@ func main(){
 	//通过Ajax判断吧名是否可用
 	http.HandleFunc("/checkBarName",controller.CheckBarName)
 
-	//通过Ajax判断用户名是否可用
-	http.HandleFunc("/checkUserName",controller.CheckUserName)
-
-	//通过Ajax判断邮箱是否可用
-	http.HandleFunc("/checkEmail",controller.CheckEmail)
+	//通过Ajax判断用户名或是否可用
+	http.HandleFunc("/checkUserNameOrEmail",controller.CheckUserNameOrEmail)
 
 	//通过Ajax判断验证码是否正确
 	http.HandleFunc("/checkCode",controller.CheckCode)
