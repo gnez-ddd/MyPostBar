@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zn-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>dd's贴吧首页</title>
+    <script src="static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            $('#sub_btn_find').click(function () {
+                //获取查找的值
+                let find = $('#find').val();
+                if (find == ""){
+                    alert("搜索不能为空！");
+                    return false;
+                }
+            });
+            //签到
+            $('#signIn').click(function () {
+                //获取用户名
+                let userName = $('userName').val();
+                let url = "/signIn";
+                let param = {"userName":userName};
+                $.post(url, param, function (res) {
+                    //将响应信息设置到span元素中
+                    $('#myMsg').html(res);
+                    //获取id为myMsg的span元素的值
+                    let myMsg = document.getElementById('myMsg').innerHTML;
+                    alert(myMsg);
+                });
+                $(this).attr({"disabled":"disabled"});
+            })
+        });
+    </script>
+</head>
+<body>
+<span class="errorMsg" id="myMsg" style="display: none" >{{.}}</span>
+    <div>
+      <h1 align="center">dd's贴吧</h1>
+      {{if.IsLogin}}
+<!--      已经登录-->
+      <div>
+        用户名：
+        <input class="itxt" type="text" disabled="disabled" value={{.User.UserName}} name="userName" id="userName"/>
+        &nbsp;&nbsp;&nbsp;
+        <img src={{.User.HeadPath}} width="80px" height="80px"/>
+        &nbsp;&nbsp;&nbsp;
+        活跃值：
+        <input class="itxt" type="text" disabled="disabled" value={{.User.Experience}} name="userExperience" id="userExperience" size="5"/>
+        <br/>
+        <br/>
+        <a href="/getMyBar">我的帖吧</a>
+        <a href="/getMyPosts">我的帖子</a>
+        <a href="/toProveUserPage">修改个人信息</a>
+        <a href="/toGetMessagesPage">我的消息</a>
+        <a href="/lookHistory">足迹</a>
+        <a href="/logout">退出登录</a>
+        {{if.User.IsSignIn}}
+        <button disabled="disabled">已签到</button>
+        {{else}}
+        <button id="signIn">每日签到</button>
+        {{end}}
+      </div>
+      {{else}}
+<!--      未登录-->
+      <div>
+        <a href="./pages/user/regist.html">注册</a>
+        <a href="./pages/user/login.html">登录</a>
+      </div>
+      {{end}}
+    </div>
+    <br/>
+    <br/>
+
+    <!--      搜索框-->
+    <div>
+        <form action="/findBarsAndPosts" method="post">
+            <input class="itxt" type="text" name="find" id="find" size="40"/>
+            <input type="submit" value="搜索" id="sub_btn_find">
+        </form>
+    </div>
+    <br/>
+    <br/>
+
+<!--    贴吧展示-->
+    <div>
+        <h3>贴吧推荐</h3>
+        <br/>
+        {{range.Bar}}
+        <a href="/goToBar?barName={{.BarName}}">{{.BarName}}</a>
+        <br/>
+        {{end}}
+    </div>
+
+<!--帖子展示-->
+<div>
+    <h3>帖子推荐</h3>
+    <br/>
+    {{range.Posts}}
+    <a href="/goToPost?barName={{.BarName}}&postTitle={{.PostTitle}}">{{.PostTitle}}</a>
+    <br/>
+    <br/>
+    {{end}}
+</div>
+
+
+
+</body>
+</html>

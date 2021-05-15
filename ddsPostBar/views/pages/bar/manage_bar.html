@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理吧的内容</title>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            //给确定按钮绑定单击事件
+            $(".deleteNotice").click(function () {
+                //获取此公告的时间和吧名
+                let time = $(this).attr("id");
+                let barName = $("#barName").val();
+                let url = "/deleteNotice";
+                //设置请求参数
+                let param = {
+                    "barName":barName,
+                    "time":time
+                };
+                //发送Ajax请求
+                $.post(url,param,function () {
+                });
+                //设置只能点击一次
+                $(this).attr({"disabled":"disabled"});
+            });
+        });
+    </script>
+</head>
+<body>
+    <div>
+      <h1 align="center">管理这个吧的内容</h1>
+    </div>
+<!--    管理吧的功能-->
+    <div>
+      吧名：
+      <input class="itxt" type="text" value={{.BarName}} disabled="disabled" class="barName" id="barName"/>
+      <br/>
+      吧主：
+      <input class="itxt" type="text" value={{.BarHostName}} disabled="disabled" class="barHostName" id="barHostName"/>
+      <br/>
+      <a href="/toSendNoticePage?barName={{.BarName}}">发布公告</a>
+    </div>
+    <br/>
+    <br/>
+<!--查看吧的公告-->
+    <div>
+        公告
+        {{range.MyNotice}}
+        <div>
+            <br/>
+            <textarea name="content" id="content" cols="30" rows="10" disabled="disabled" >{{.Content}}</textarea>
+            <br/>
+            发布日期：
+            <input class="itxt" type="text" value={{.Time}} disabled="disabled" name="time" id="time" size="50"/>
+            <br/>
+            <input type="button" value="删除此公告" class="deleteNotice" id={{.Time}}/>
+        </div>
+        {{end}}
+    </div>
+</body>
+</html>

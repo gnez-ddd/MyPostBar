@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zn-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>dd's贴吧登录</title>
+    <script type="text/javascript" src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+      $(function () {
+          //获取验证码
+          $("#getCode").click(function () {
+              let username = $("#username").val();
+              let url = "/sendEmailByUserName";
+              //设置请求参数
+              let param = {"userName":username};
+              //发送Ajax请求
+              $.post(url,param,function (res) {
+                  //将显示提示信息的span元素显示
+                  $("#msg").show();
+                  //将响应信息设置到span元素中
+                  $("#msg").html(res);
+              });
+          });
+          //发送Ajax请求验证验证码是否正确
+          //给输入验证码的文本框绑定change事件
+          $("#codeInput").change(function () {
+              //获取用户输入的验证码
+              let codeInput = $(this).val();
+              let userName = $("#username").val();
+              //设置请求地址
+              let url = "/checkCodeByUserName";
+              //设置请求参数
+              let param = {
+                  "codeInput":codeInput,
+                  "userName":userName
+              };
+              //发送Ajax请求
+              $.post(url,param,function (res) {
+                  //将响应信息设置到span元素
+                  $("#msg").html(res);
+              });
+          });
+          //给登录按钮绑定单击事件
+        $("#sub_btn").click(function () {
+            let username = $("username").val();
+            //判断用户名是否为空
+          if(username == ""){
+            alert("用户名不能为空！");
+            return false;
+          }
+          //获取输入的密码
+          let password = $("#password").val();
+          if(password == ""){
+            alert("密码不能为空！");
+            return false;
+          }
+        });
+        //切换span中的标签
+        if("{{.}}"=="用户名或密码不正确！"){
+          //设置span中的文本值
+          $("#msg").text("用户名或密码不正确！");
+        }
+      });
+    </script>
+</head>
+<body>
+    <div class="msg_cont">
+      <b></b>
+      <span class="errorMsg" id="msg">请输入用户名和密码</span>
+    </div>
+    <div class="form">
+      <form action="/login" method="post">
+        用户名称：
+        <input class="itxt" type="text" autocomplete="off" tabindex="1" name="username" id="username"/>
+        <br/>
+        <br/>
+        用户密码：
+          <input class="itxt" type="password" autocomplete="off" tabindex="1" name="password" id="password"/>
+        <br/>
+        <br/>
+        验证码：
+        <input class="itxt" type="text" autocomplete="off" tabindex="1" name="codeInput" id="codeInput"/>
+        <input type="button" value="发送验证码" id="getCode" />
+        <br/>
+        <br/>
+        <br/>
+        <input type="submit" value="登录" id="sub_btn"/>
+      </form>
+    </div>
+    <br/>
+    <br/>
+    <div>
+      <a href="../../pages/user/regist.html">注册</a>
+      <a href="../../pages/user/find_password.html">忘记密码</a>
+    </div>
+</body>
+</html>

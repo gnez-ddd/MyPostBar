@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>修改信息身份验证</title>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            //给确认按钮绑定单击事件
+            $("#sub_btn").click(function () {
+                //获取密码码
+                let password = $("#password").val();
+                if(password == ""){
+                    alert("密码码不能为空！")
+                    return false;
+                };
+            });
+        });
+    </script>
+</head>
+<body>
+    <div>
+        <h1>身份验证</h1>
+    </div>
+    <a href="/index">首页</a>
+    <br/>
+    <br/>
+    <div>
+        <form action="/proveUser" method="post">
+            用户名：
+            <input class="itxt" type="text" value={{.UserName}} disabled="disabled" name="userName" id="userName"/>
+            <br/>
+            <br/>
+            密码：
+            <input class="itxt" type="password" autocomplete="off" tabindex="1" name="password" id="password"/>
+            <br/>
+            <br/>
+            <br/>
+            <input type="submit" value="确认" id="sub_btn"/>
+        </form>
+    </div>
+</body>
+</html>

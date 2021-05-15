@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的贴吧</title>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            $('#disLikedBar').click(function () {
+                //获取该吧名
+                let barName = $('#disLikedBar').val();
+                let url = "/disLikedBar";
+                let param={"barName":barName};
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素
+                    $("#msg").html(res);
+                    //获取id为msg的span元素的值
+                    let msg = document.getElementById('msg').innerHTML
+                    alert(msg)
+                });
+                $(this).attr({"disabled":"disabled"});
+            });
+        });
+    </script>
+</head>
+<body>
+<span class="errorMsg" id="msg" style="display: none">{{.}}</span>
+    <div>
+      <h1 align="center">我的贴吧</h1>
+    </div>
+
+<!--    功能区-->
+    <div>
+        <a href="../../pages/bar/create_bar.html">创建贴吧</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="/index">首页</a>
+    </div>
+    <br/>
+    <br/>
+
+<!--    属于我自己的贴吧-->
+    <div>
+        <h3>我创建的贴吧</h3>
+        {{range.BarCreate}}
+        <div>
+            <br/>
+                <a href="/goToBar?barName={{.BarName}}">{{.BarName}}</a>
+            <br/>
+        </div>
+        {{end}}
+    </div>
+
+<!--我关注的贴吧-->
+    <div>
+        <h3>我关注的贴吧</h3>
+        {{range.BarLiked}}
+        <div>
+            <br/>
+            <a href="/goToBar?barName={{.BarName}}">{{.BarName}}</a>
+            &nbsp;&nbsp;&nbsp;
+            <button value={{.BarName}} id="disLikedBar">取消关注</button>
+            <br/>
+        </div>
+        {{end}}
+    </div>
+
+</body>
+</html>

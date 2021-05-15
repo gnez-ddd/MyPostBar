@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员的消息</title>
+</head>
+<body>
+<!--若为系统管理员-->
+    {{if.}}
+    <div>
+        <h1 align="center">收到的消息种类</h1>
+    </div>
+    <a href="/index">首页</a>
+    <div>
+        <a href="/getCreateBarMessages">申请创建贴吧消息</a>
+        <br/>
+        <a href="/getReportMessage">举报消息</a>
+        <br/>
+        <a href="/getPostApplicationToRecover">申请帖子恢复消息</a>
+    </div>
+    {{else}}
+<!--为用户-->
+    <div>
+        <h1 align="center">收到的消息种类</h1>
+    </div>
+    <a href="/index">首页</a>
+    <div>
+        <a href="/getPostApplicationToRecover">申请帖子恢复消息</a>
+    </div>
+    {{end}}
+</body>
+</html>

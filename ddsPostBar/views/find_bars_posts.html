@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>寻找贴吧和帖子</title>
+</head>
+<body>
+    <div>
+      <h3>找到的贴吧</h3>
+      <br/>
+      {{range.Bar}}
+      <a href="/goToBar?barName={{.BarName}}">{{.BarName}}</a>
+      <br/>
+      {{end}}
+    </div>
+
+    <div>
+      <h3>找到的帖子</h3>
+      <br/>
+      {{range.Posts}}
+      <a href="/goToPost?barName={{.BarName}}&postTitle={{.PostTitle}}">{{.PostTitle}}</a>
+      <br/>
+      <br/>
+      {{end}}
+    </div>
+</body>
+</html>

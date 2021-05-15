@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的帖子</title>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            //取消收藏
+            $('#likedFalse').click(function () {
+                let kind = "disliked";
+                let url = "/PostIsLiked";
+                let param = {
+                    "title": $('#likedPostTitle').val(),
+                    "barName": $('#likedBarName').val(),
+                    "kind": kind
+                };
+                $.post(url, param, function (res) {
+                    //将响应信息设置到span元素中
+                    $('#myMsg').html(res);
+                    //获取id为myMsg的span元素的值
+                    let myMsg = document.getElementById('myMsg').innerHTML;
+                    alert(myMsg);
+                });
+                $(this).attr({"disabled": "disabled"});
+            });
+            //恢复帖子
+            $('#disDeletePost').click(function () {
+                let barName = $('#deleteBarName').val();
+                let title = $('#deletePostTitle').val();
+                let param = {
+                    "barName": barName,
+                    "title": title
+                };
+                let url = "/disDeletePost";
+                $.post(url, param, function (res) {
+                    //将响应信息设置到span元素中
+                    $('#myMsg').html(res);
+                    //获取id为myMsg的span元素的值
+                    let myMsg = document.getElementById('myMsg').innerHTML;
+                    alert(myMsg);
+                });
+                $(this).attr({"disabled": "disabled"});
+            });
+            //申请恢复帖子
+            $('#applicationToRecover').click(function () {
+                let barName = $('#BarNameDeleted').val();
+                let title = $('#postTitleDeleted').val();
+                let param = {
+                    "barName": barName,
+                    "title": title
+                }
+                let url = "/applicationToRecoverPost";
+                $.post(url, param, function (res) {
+                    //将响应信息设置到span元素中
+                    $('#myMsg').html(res);
+                    //获取id为myMsg的span元素的值
+                    let myMsg = document.getElementById('myMsg').innerHTML;
+                    alert(myMsg);
+                });
+                $(this).attr({"disabled": "disabled"});
+            });
+
+        })
+    </script>
+</head>
+<body>
+<span class="errorMsg" id="myMsg" style="display: none" >{{.}}</span>
+    <div>
+      <h1 align="center">我的帖子</h1>
+    </div>
+
+<a href="/index">首页</a>
+<!--我创建的帖子-->
+    <div>
+      <h3>我创建的帖子</h3>
+      {{range.PostCreate}}
+       帖子标题：
+       <a href="/goToPost?barName={{.BarName}}&postTitle={{.PostTitle}}">{{.PostTitle}}</a>
+       &nbsp;&nbsp;&nbsp;
+       属于的吧
+       <a href="/goToBar?barName={{.BarName}}">{{.BarName}}</a>
+       &nbsp;&nbsp;&nbsp;
+       <a href="/deletePost?barName={{.BarName}}&postTitle={{.PostTitle}}&now=MyPost">删除帖子</a>
+       <br/>
+       <br/>
+       {{end}}
+    </div>
+<!--我收藏的帖子-->
+    <div>
+        <h3>我收藏的帖子</h3>
+        {{range.PostLiked}}
+        帖子标题：
+        <a href="/goToPost?barName={{.BarName}}&postTitle={{.PostTitle}}">{{.PostTitle}}</a>
+        <input id="likedPostTitle" value={{.PostTitle}} style="display: none" class="itxt" type="text"/>
+        &nbsp;&nbsp;&nbsp;
+        属于的吧
+        <a href="/goToBar?barName={{.BarName}}">{{.BarName}}</a>
+        <input id="likedBarName" value="{{.BarName}}" style="display: none" class="itxt" type="text">
+        &nbsp;&nbsp;&nbsp;
+        <button id="likedFalse">取消收藏</button>
+        <br/>
+        <br/>
+        {{end}}
+    </div>
+<!--删除的帖子-->
+    <div>
+        <h3>删除的帖子</h3>
+        {{range.PostDelete}}
+        帖子标题：
+        <input id="deletePostTitle" value={{.PostTitle}} disabled="disabled" class="itxt" type="text"/>
+        &nbsp;&nbsp;&nbsp;
+        属于的吧:
+        <input id="deleteBarName" value={{.BarName}} disabled="disabled" class="itxt" type="text">
+        &nbsp;&nbsp;&nbsp;
+        <button id="disDeletePost">恢复</button>
+        <br/>
+        <br/>
+        {{end}}
+    </div>
+<!--被删除的帖子-->
+    <div>
+        <h3>被删除的帖子</h3>
+        {{range.PostDeleted}}
+        帖子标题：
+        <input id="postTitleDeleted" value={{.PostTitle}} disabled="disabled" class="itxt" type="text"/>
+        &nbsp;&nbsp;&nbsp;
+        属于的吧：
+        <input id="BarNameDeleted" value={{.BarName}} disabled="disabled" class="itxt" type="text"/>
+        &nbsp;&nbsp;&nbsp;
+        <button id="applicationToRecover">申请恢复</button>
+        <br/>
+        <br/>
+        {{end}}
+    </div>
+</body>
+</html>

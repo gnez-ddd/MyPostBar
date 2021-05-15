@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>举报消息</title>
+</head>
+<body>
+<span class="errorMsg" id="msg" style="display: none" >{{.}}</span>
+    <div>
+      <h1 align="center">举报消息</h1>
+    </div>
+    <a href="/index">首页</a>
+    <div>
+      <h3>被举报的贴吧</h3>
+      {{range.BarMessages}}
+      <div>
+      吧名：
+      <input class="itxt" type="text" disabled="disabled" value={{.BarName}} name="barBarName" id="barBarName"/>
+      &nbsp;&nbsp;&nbsp;
+      {{if.BarStatus}}
+      <a href="/bannedBar?barName={{.BarName}}">封禁该贴吧</a>
+      {{else}}
+      <button disabled="disabled">该贴吧已被封禁</button>
+      {{end}}
+        &nbsp;&nbsp;&nbsp;
+      {{if.UserStatus}}
+      <a href="/bannedUser?barName={{.BarName}}&title=nil">封禁该吧主</a>
+      {{else}}
+      <button disabled="disabled">该吧主已被封禁</button>
+      {{end}}
+        &nbsp;&nbsp;&nbsp;
+      <a href="/deleteReport?barName={{.BarName}}&title=nil">删除该举报消息</a>
+      <br/>
+      <br/>
+      </div>
+      {{end}}
+    </div>
+
+
+    <div>
+      <h3>被举报的帖子</h3>
+      {{range.PostMessages}}
+      <div>
+      吧名：
+      <input class="itxt" type="text" disabled="disabled" value={{.BarName}} name="postBarName" id="postBarName"/>
+      &nbsp;&nbsp;&nbsp;
+      帖子标题：
+      <input class="itxt" type="text" disabled="disabled" value={{.PostTitle}} name="postTitle" id="postTitle"/>
+      &nbsp;&nbsp;&nbsp;
+      {{if.PostStatus}}
+      <a href="/bannedPost?barName={{.BarName}}&title={{.PostTitle}}">封禁该帖子</a>
+      {{else}}
+      <button disabled="disabled">该帖子已被封禁</button>
+      {{end}}
+      &nbsp;&nbsp;&nbsp;
+      {{if.UserStatus}}
+      <a href="/bannedUser?barName={{.BarName}}&title={{.PostTitle}}">封禁该发帖者</a>
+      {{else}}
+      <button disabled="disabled">该发帖者已被封禁</button>
+      {{end}}
+        &nbsp;&nbsp;&nbsp;
+      <a href="/deleteReport?barName={{.BarName}}&title={{.PostTitle}}">删除该举报消息</a>
+      <br/>
+      <br/>
+      </div>
+      {{end}}
+    </div>
+</body>
+</html>

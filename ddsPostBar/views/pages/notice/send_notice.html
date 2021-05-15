@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>发布公告</title>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            //给发布按钮绑定单击事件
+            $("#sub_btn").click(function () {
+                //获取内容与吧名
+                let content = $("#content").val();
+                let barName = $("#barName").val();
+                if (content == ""){
+                    alert("公告内容不能为空！");
+                    return false;
+                }
+                //通过Ajax请求发布公告
+                //设置请求地址
+                let url = "/sendNotice";
+                //设置请求参数
+                let param = {
+                    "barName":barName,
+                    "content":content
+                };
+                //发送Ajax请求
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素
+                    $("#msg").html(res);
+                    //获取id为msg的span元素的值
+                    let msg = document.getElementById('msg').innerHTML;
+                    alert(msg);
+                });
+                $(this).attr({"disabled":"disabled"});
+            });
+        });
+    </script>
+</head>
+<body>
+    <div>
+        <span class="errorMsg" id="msg" style="display: none" >{{.}}</span>
+            吧名：
+            <input class="itxt" type="text" value={{.}} disabled="disabled" name="barName" id="barName"/>
+            &nbsp;&nbsp;&nbsp;
+            <a href="/goToBar?barName={{.}}">返回贴吧</a>
+            <br/>
+            <br/>
+            <textarea name="content" id="content" cols="30" rows="10" maxlength="100"></textarea>
+            <br/>
+            <br/>
+            <input type="submit" value="发布" id="sub_btn">
+    </div>
+    <br/>
+
+</body>
+</html>

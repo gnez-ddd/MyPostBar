@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>创建贴吧</title>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            //给提交按钮绑定单击事件
+            $("#sub_btn").click(function () {
+                //获取贴吧名
+                let barName = $("#barName").val();
+                if (barName == ""){
+                    alert("吧名不能为空！");
+                    return false;
+                }
+            });
+            //将显示错误的信息隐藏
+            $("#msg").hide();
+            //通过Ajax请求验证吧名是否可用
+            //给输入吧名的文本框绑定change事件
+            $("#barName").change(function () {
+                //获取用户输入的吧名
+                let barName = $(this).val();
+                //设置请求地址
+                let url = "/checkBarName";
+                //设置请求参数
+                let param = {"barName":barName};
+                //发送Ajax请求
+                $.post(url,param,function (res) {
+                    //将显示提示信息的span元素显示
+                    $("#msg").show();
+                    //将响应信息设置到span元素中
+                    $("#msg").html(res);
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div>
+      <h1 align="center">贴吧创建</h1>
+      <span class="msg_cont" id="msg">{{.}}</span>
+    </div>
+    <div>
+      <form action="/barCreate" method="post">
+          吧名：
+          <input class="itxt" type="text" autocomplete="off" tabindex="1" name="barName" id="barName"/>
+          <br/>
+          <br/>
+          <br/>
+          <input type="submit" value="创建" id="sub_btn"/>
+      </form>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>申请创建贴吧消息</title>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            //给确定按钮绑定单击事件
+            $(".ensure").click(function () {
+                //获取状态的值
+                let status = $("input:radio:checked").val()
+                if (status == "agree"){
+                    //同意创建贴吧
+                    //获取吧名
+                    let barName = $(this).attr("id");
+                    let url = "/agreeToCreateBar";
+                    //设置请求参数
+                    let param = {"barName":barName};
+                    //发送Ajax请求
+                    $.post(url,param,function () {
+                    });
+                }
+                if (status == "disagree"){
+                    //不同意创建贴吧
+                    //获取吧名
+                    let barName = $(this).attr("id");
+                    let url = "/disagreeToCreateBar";
+                    //设置请求参数
+                    let param = {"barName":barName};
+                    //发送Ajax请求
+                    $.post(url,param,function () {
+                    });
+                }
+                $(this).attr({"disabled":"disabled"});
+            });
+
+        });
+    </script>
+</head>
+<body>
+
+    <div>
+      <h1 align="center">申请创建贴吧消息</h1>
+    </div>
+    <a href="/index">首页</a>
+    <br/>
+    <br/>
+    <div>
+      收到的消息：
+      <br/>
+      <br/>
+      <br/>
+      {{range.}}
+      <div>
+          <br/>
+          发件人：
+          <input class="itxt" type="text" value={{.SenderName}} disabled="disabled" name="senderName" id="senderName"/>
+          <br/>
+          吧名：
+          <input class="itxt" type="text" size="100" value={{.BarName}} disabled="disabled" name="barName" id="barName"/>
+          <br/>
+          <br/>
+          同意
+          <input type="radio" name="status" checked="checked" value="agree"/>
+          拒绝
+          <input type="radio" name="status" value="disagree" />
+          <br/>
+          <input type="button" value="确定" class="ensure" id={{.BarName}} />
+          <br/>
+          <br/>
+          <br/>
+      </div>
+      {{end}}
+    </div>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>个人信息修改</title>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            //发送验证码
+            $("#getCode").click(function () {
+                let email = $("#newEmail").val();
+                if (email == ""){
+                    alert("请输入邮箱！");
+                    return false;
+                }else{
+                    let url = "/sendEmail";
+                    //设置请求参数
+                    let param = {"email":email};
+                    //发送Ajax请求
+                    $.post(url,param,function (res) {
+                        //将显示提示信息的span元素显示
+                        $("#msg").show();
+                        //将响应信息设置到span元素中
+                        $("#msg").html(res);
+                    });
+                };
+            });
+
+            //给确认按钮绑定单击事件
+            $("#sub_btn").click(function () {
+                //获取文件
+                let image = $("#image").val();
+                if (image != ""){
+                    //获取最后一个.的位置
+                    let index = image.lastIndexOf(".");
+                    //获取后缀
+                    let ext = image.substr(index + 1);
+                    //设置图片后缀表达式
+                    let extReg = /(jpg|jpeg|png|JPG|PNG)$/;
+                    if(!extReg.test(ext)){
+                        alert("传入文件有误！");
+                        return false;
+                    }
+                }
+                //获取邮箱
+                let newEmail = $("#newEmail").val();
+                if (newEmail != ""){
+                    //邮箱的正则表达式
+                    let emailReg = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+                    if(!emailReg.test(newEmail)){
+                        alert("邮箱格式不正确");
+                        return false;
+                    }
+                }
+
+                //获取新用户名
+                let newUserName = $("#newUsername").val();
+                if (newUserName != ""){
+                    //用户名的正则表达式
+                    let usernameReg = /^[A-Za-z0-9_-]{3,16}$/;
+                    if(!usernameReg.test(newUserName)){
+                        alert("请输入3-16位的字母、数字、下划线或减号的用户名！");
+                        return false;
+                    }
+                }
+                //获取验证码
+                let codeInput = $("#codeInput").val();
+                if (newEmail != ""){
+                    if(codeInput == ""){
+                        alert("验证码不能为空！");
+                        return false;
+                    }
+                }
+
+            });
+            //将显示错误提示信息的span标签隐藏
+            $("#msg").hide();
+
+            //发送Ajax请求验证用户名是否存在
+            //给输入用户名的文本框绑定change事件
+            $("#newUsername").change(function () {
+                //获取用户输入的用户名
+                let username = $(this).val();
+                if(username != ""){
+                    //设置请求地址
+                    let url = "/checkUserName";
+                    //设置请求参数
+                    let param = {"username":username};
+                    //发送Ajax请求
+                    $.post(url,param,function (res) {
+                        //将显示提示信息的span元素显示
+                        $("#msg").show();
+                        //将响应信息设置到span元素中
+                        $("#msg").html(res);
+                    });
+                }
+            });
+            //发送Ajax请求验证邮箱是否存在
+            //给输入邮箱的文本框绑定change事件
+            $("#newEmail").change(function () {
+                //获取用户输入的用户名
+                let email = $(this).val();
+                if (email != ""){
+                    //设置请求地址
+                    let url = "/checkEmail";
+                    //设置请求参数
+                    let param = {"email":email};
+                    //发送Ajax请求
+                    $.post(url,param,function (res) {
+                        //将显示提示信息的span元素显示
+                        $("#msg").show();
+                        //将响应信息设置到span元素中
+                        $("#msg").html(res);
+                    });
+                }
+            });
+            //发送Ajax请求验证验证码是否正确
+            //给输入验证码的文本框绑定change事件
+            $("#codeInput").change(function () {
+                //获取用户输入的验证码
+                let codeInput = $(this).val();
+                let email = $("#email").val();
+                if(email != ""){
+                    //设置请求地址
+                    let url = "/checkCode";
+                    //设置请求参数
+                    let param = {
+                        "codeInput":codeInput,
+                        "email":email
+                    };
+                    //发送Ajax请求
+                    $.post(url,param,function (res) {
+                        //将显示提示信息的span元素显示
+                        $("msg").show();
+                        //将响应信息设置到span元素
+                        $("#msg").html(res);
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div>
+        <h1>用户信息修改</h1>
+        <span class="errorMsg" id="msg">{{.}}</span>
+    </div>
+    <a href="/index">首页</a>
+    <br/>
+    <br/>
+    <div>
+        <form action="/setUserInformation" method="post" enctype="multipart/form-data">
+            头像：
+            <br/>
+            <br/>
+            <img src={{.HeadPath}} width="100px" height="100px"/>
+            <br/>
+            <br/>
+            修改头像：
+            <input type="file" name="image" id="image"/>
+            <br/>
+            <br/>
+            用户名：
+            <input class="itxt" type="text" value={{.UserName}} disabled="disabled" name="username" id="username"/>
+            <br/>
+            <br/>
+            新用户名
+            <input class="itxt" type="text"  autocomplete="off" tabindex="1" name="newUsername" id="newUsername"/>
+            <br/>
+            <br/>
+            密码：
+            <input class="itxt" type="password" value={{.PassWord}} disabled="disabled" name="passWord" id="passWord"/>
+            <br/>
+            <br/>
+            新密码：
+            <input class="itxt" type="password" autocomplete="off" tabindex="1" name="newPSW" id="newPSW"/>
+            <br/>
+            <br/>
+            邮箱：
+            <input class="itxt" type="text" value={{.Email}} disabled="disabled" name="email" id="email"/>
+            <br/>
+            <br/>
+            新邮箱：
+            <input class="itxt" type="text" autocomplete="off" tabindex="1" name="newEmail" id="newEmail"/>
+            <input type="button" value="发送验证码" id="getCode" />
+            <br/>
+            <br/>
+            验证码：
+            <input class="itxt" type="text" autocomplete="off" tabindex="1" name="codeInput" id="codeInput"/>
+            <br/>
+            <br/>
+            <br/>
+            <input type="submit" value="确认" id="sub_btn"/>
+        </form>
+    </div>
+</body>
+</html>

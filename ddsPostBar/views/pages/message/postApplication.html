@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>申请帖子恢复消息</title>
+  <script src="../../static/script/jquery-1.7.2.js"></script>
+  <script>
+    $(function () {
+      //给确定按钮绑定单击事件
+      $(".ensure").click(function () {
+        //获取状态的值
+        let status = $("input:radio:checked").val()
+        if (status == "agree"){
+          //同意
+          //获取吧名标题
+          let barName = $('#barName').val();
+          let title = $('#title').val();
+          let url = "/agreeToRecoverPost";
+          //设置请求参数
+          let param = {
+            "barName":barName,
+            "title":title
+          };
+          //发送Ajax请求
+          $.post(url,param,function (res) {
+              //将响应信息设置到span元素
+              $("#msg").html(res);
+              //获取id为msg的span元素的值
+              let msg = document.getElementById('msg').innerHTML;
+              alert(msg);
+          });
+        }
+        if (status == "disagree"){
+          //不同意
+          //获取吧名
+          //获取吧名标题
+          let barName = $('#barName').val();
+          let title = $('#title').val();
+          let url = "/disagreeToRecoverPost";
+          //设置请求参数
+          let param = {
+            "barName":barName,
+            "title":title
+          };
+          //发送Ajax请求
+          $.post(url,param,function (res) {
+              //将响应信息设置到span元素
+              $("#msg").html(res);
+              //获取id为msg的span元素的值
+              let msg = document.getElementById('msg').innerHTML;
+              alert(msg);
+          });
+        }
+        $(this).attr({"disabled":"disabled"});
+      });
+
+    });
+  </script>
+</head>
+<body>
+<span class="errorMsg" id="msg" style="display: none" >{{.}}</span>
+    <div>
+      <h1 align="center">申请帖子恢复信息</h1>
+    </div>
+    {{range.}}
+    帖子标题：
+    <input class="itxt" type="text" value={{.PostTitle}} disabled="disabled" name="title" id="title"/>
+    &nbsp;&nbsp;&nbsp;
+    来自的吧：
+    <input class="itxt" type="text" value={{.BarName}} disabled="disabled" name="barName" id="barName"/>
+    &nbsp;&nbsp;&nbsp;
+    同意
+    <input type="radio" name="status" checked="checked" value="agree"/>
+    拒绝
+    <input type="radio" name="status" value="disagree" />
+    <br/>
+    <input type="button" value="确定" class="ensure" />
+    <br/>
+    <br/>
+    {{end}}
+</body>
+</html>

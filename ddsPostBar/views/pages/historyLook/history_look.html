@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的足迹</title>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            $('.delete').click(function () {
+                return confirm("确定删除吗？");
+            })
+        })
+    </script>
+</head>
+<body>
+    <a href="/index">首页</a>
+<!--    访问过的贴吧-->
+    <div>
+      <h3>访问过的贴吧</h3>
+      {{range.Bar}}
+      <a href="/goToBar?barName={{.BarName}}">{{.BarName}}</a>
+      &nbsp;&nbsp;&nbsp;
+      日期：
+      <input class="itxt" type="text" value={{.Time}} name="lookBarTime" id="lookBarTime" disabled="disabled"/>
+      &nbsp;&nbsp;&nbsp;
+      <a href="/deleteBarHistory?barName={{.BarName}}&time={{.Time}}" class="delete">删除改记录</a>
+      <br/>
+      {{end}}
+    </div>
+<!--    访问过的帖子-->
+    <div>
+      <h3>访问过的帖子</h3>
+      {{range.Posts}}
+      <a href="/goToPost?barName={{.BarName}}&postTitle={{.PostTitle}}">{{.PostTitle}}</a>
+      &nbsp;&nbsp;&nbsp;
+      日期：
+      <input class="itxt" type="text" value={{.PostDate}} name="lookPostTime" id="lookPostTime" disabled="disabled"/>
+      &nbsp;&nbsp;&nbsp;
+      <a href="/deletePostHistory?barName={{.BarName}}&title={{.PostTitle}}&time={{.PostDate}}" class="delete">删除改记录</a>
+      <br/>
+      {{end}}
+    </div>
+</body>
+</html>

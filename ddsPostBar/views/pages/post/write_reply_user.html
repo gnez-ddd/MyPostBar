@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>写回复他人帖子回复</title>
+    <script src="../../static/script/wangeditor-4.6.17/package/dist/wangEditor.js"></script>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+</head>
+<body>
+    <div>
+      <h1 align="center">写回复他人帖子回复内容</h1>
+      <input class="itxt" type="text" value={{.}} name="postID" id="postID" style="display: none"/>
+    </div>
+    <a href="/index">首页</a>
+
+    <div>
+      <span class="errorMsg" id="msg" style="display: none">{{.}}</span>
+      <h2>写回复帖子内容</h2>
+      <div id="editor"></div>
+      <br/>
+      <button id="sub_btn">双击提交</button>
+      <script type="text/javascript">
+        let E = window.wangEditor
+        let editor = new E('#editor')
+        editor.config.menus = [
+          'head',  // 标题
+          'bold',  // 粗体
+          'fontSize',  // 字号
+          'fontName',  // 字体
+          'italic',  // 斜体
+          'justify',  // 对齐方式
+          'quote',  // 引用
+          'emoticon',  // 表情
+          'image',  // 插入图片
+          'undo',  // 撤销
+          'redo'  // 重复
+        ]
+        let config = editor.customConfig?editor.customConfig : editor.confg;
+        editor.config.uploadImgShowBase64 = true
+        editor.create()
+        $(function () {
+          $('#sub_btn').click(function () {
+            document.getElementById('sub_btn').addEventListener('click',function () {
+              const content = editor.txt.html();
+              if (content == ""){
+                  alert("内容不能为空！");
+                  return false;
+              }
+              let url = '/getUerReply';
+              let param = {
+                "content":content,
+                "postID":$('#postID').val()
+              };
+              $.post(url,param,function (res) {
+                //将响应信息设置到span元素中
+                $('#msg').html(res);
+                //获取span元素的值
+                let msg = document.getElementById('msg').innerHTML;
+                alert(msg);
+              });
+              editor.txt.clear();
+            },false);
+          });
+        });
+      </script>
+    </div>
+
+</body>
+</html>

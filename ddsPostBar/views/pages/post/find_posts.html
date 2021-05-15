@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>吧内搜索帖子</title>
+</head>
+<body>
+  <div>
+    <h3>搜索到的帖子</h3>
+    <form action="/postsOrderByTimeInFindPosts" method="post">
+        <input class="itxt" type="text" value={{.BarNow}} id="orderBarName" name="orderBarName" style="display: none"/>
+        <input class="itxt" type="text" value={{.Find}} id="orderFind" name="orderFind" style="display: none"/>
+        <input type="submit" value="按时间由近到远排序" id="orderByTime">
+    </form>
+    <br/>
+    <br/>
+    {{range.Posts}}
+    <a href="/goToPost?barName={{.BarName}}&postTitle={{.PostTitle}}">{{.PostTitle}}</a>
+    <br/>
+    <br/>
+    {{end}}
+</div>
+</body>
+</html>

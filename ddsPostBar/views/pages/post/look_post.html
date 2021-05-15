@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>帖子内容</title>
+    <script src="../../static/script/wangeditor-4.6.17/package/dist/wangEditor.js"></script>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            //获取吧名和帖子标题
+            let barName = $('#barName').val();
+            let title = $('#postTitle').val();
+            //点赞
+            $('#thumbTrue').click(function () {
+                let judge = 1;
+                let url = "/PostIsThumb";
+                let param = {
+                    "barName":barName,
+                    "title":title,
+                    "judge":judge
+                };
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素中
+                    $('#myMsg').html(res);
+                    //获取id为myMsg的span元素的值
+                    let myMsg = document.getElementById('myMsg').innerHTML;
+                    alert(myMsg);
+                    if (myMsg == "成功点赞！"){
+                        $('#thumbTrue').attr({"disabled":"disabled"});
+                    }
+                });
+            });
+            //取消点赞
+            $('#thumbFalse').click(function () {
+                let judge = 0;
+                let url = "/PostIsThumb";
+                let param = {
+                    "barName":barName,
+                    "title":title,
+                    "judge":judge
+                };
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素中
+                    $('#myMsg').html(res);
+                    //获取id为myMsg的span元素的值
+                    let myMsg = document.getElementById('myMsg').innerHTML;
+                    alert(myMsg);
+                });
+                $(this).attr({"disabled":"disabled"});
+            });
+            //收藏
+            $('#likedTrue').click(function () {
+                let kind = "liked";
+                let url = "/PostIsLiked";
+                let param = {
+                    "barName":barName,
+                    "title":title,
+                    "kind":kind
+                };
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素中
+                    $('#myMsg').html(res);
+                    //获取id为myMsg的span元素的值
+                    let myMsg = document.getElementById('myMsg').innerHTML;
+                    alert(myMsg);
+                    if (myMsg == "成功收藏！"){
+                        $('#likedTrue').attr({"disabled":"disabled"});
+                    }
+                });
+            });
+            //取消收藏
+            $('#likedFalse').click(function () {
+                let kind = "disliked";
+                let url = "/PostIsLiked";
+                let param = {
+                    "barName":barName,
+                    "title":title,
+                    "kind":kind
+                };
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素中
+                    $('#myMsg').html(res);
+                    //获取id为myMsg的span元素的值
+                    let myMsg = document.getElementById('myMsg').innerHTML;
+                    alert(myMsg);
+                });
+                $(this).attr({"disabled":"disabled"});
+            });
+            //举报帖子
+            $('#reportPost').click(function () {
+                //获取吧名和帖子标题
+                let barName = $('#barName').val();
+                let title = $('#postTitle').val();
+                let url = "/reportPost";
+                let param = {
+                    "barName":barName,
+                    "title":title
+                };
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素
+                    $("#msg").html(res);
+                    //获取id为msg的span元素的值
+                    let msg = document.getElementById('msg').innerHTML;
+                    alert(msg);
+                });
+                $(this).attr({"disabled":"disabled"});
+            });
+        });
+    </script>
+</head>
+<body>
+
+<span class="errorMsg" id="myMsg" style="display: none" >{{.}}</span>
+<!--查看帖子信息-->
+<div>
+    <div>
+        吧名：
+        <input class="itxt" type="text" disabled="disabled" value={{.BarName}} name="barName" id="barName"/>
+        标题：
+        <input class="itxt" type="text" disabled="disabled" value={{.PostTitle}} name="postTitle" id="postTitle"/>
+        发布者：
+        <input class="itxt" type="text" disabled="disabled" value={{.PostHostName}} name="postOwner" id="postOwner"/>
+        发布时间：
+        <input class="itxt" type="text" disabled="disabled" size="30" value={{.PostDate}} name="date" id="date" />
+        &nbsp;&nbsp;
+<!--        点赞功能-->
+        {{if.IsThumb}}
+        <button id="thumbFalse">取消点赞</button>
+        {{else}}
+        <button id="thumbTrue">点赞</button>
+        {{end}}
+        &nbsp;&nbsp;
+<!--        收藏功能-->
+        {{if.IsLiked}}
+        <button id="likedFalse">取消收藏</button>
+        {{else}}
+        <button id="likedTrue">收藏</button>
+        {{end}}
+        &nbsp;&nbsp;&nbsp;
+        <button id="reportPost">举报</button>
+        &nbsp;&nbsp;&nbsp;
+        <a href="/index">首页</a>
+        <br/>
+        <br/>
+        内容：
+        <div id="show"></div>
+        <input id="postContent" value={{.PostContent}} disabled="disabled" style="display: none">
+        <br/>
+    </div>
+</div>
+
+<!--展示回复内容-->
+<div>
+    <h2>回复的内容</h2>
+    共<input class="itxt" type="text" value={{.TotalReply}} disabled="disabled" name="totalReply" id="totalReply" size="5"/>条回复
+    <hr size="5" color="black">
+    {{range.Reply}}
+    <div>
+            <br/>
+            <input class="itxt" type="text" value={{.ID}} name="replyID" id="replyID" style="display: none"/>
+            用户：
+            <input class="itxt" type="text" value={{.UserName}} name="replyEr" id="replyEr" disabled="disabled"/>
+             &nbsp;&nbsp;&nbsp;
+             时间：
+            <input class="itxt" type="text" value={{.Time}} name="replyTime" id="replyTime" disabled="disabled"/>
+             <br/>
+            内容：
+            <div id={{.Rank1}}></div>
+            <input id={{.Rank2}} value={{.Content}} disabled="disabled" style="display: none"/>
+            <hr size="2" color="black"/>
+             <br/>
+            他人的回复：
+                <input class="itxt" type="text" value={{.TotalUserReply}} disabled="disabled" id={{.TotalUserReplyRank}} name="totalUserReply" style="display: none" />
+                <br/>
+                {{range.UserReply}}
+                <div>
+                    <br/>
+                    用户：
+                    <input class="itxt" type="text" value={{.UserName}} name="userReplyEr" id="userReplyEr" disabled="disabled"/>
+                    &nbsp;&nbsp;&nbsp;
+                    时间：
+                    <input class="itxt" type="text" value={{.Time}} name="userReplyTime" id="userReplyTime" disabled="disabled"/>
+                    <br/>
+                    内容：
+                    <div id={{.UserRank1}}></div>
+                    <input id={{.UserRank2}} value={{.Content}} disabled="disabled" style="display: none"/>
+                    <hr>
+                </div>
+                {{end}}
+            <br/>
+            <a href="/toReplyUserInPostPage?postReplyID={{.ID}}">回复</a>
+            <br/>
+            <br/>
+            <hr size="5" color="black">
+    </div>
+    {{end}}
+</div>
+<script>
+    let totalPostReply = $('#totalReply').val();
+    for(let i = 1;i<=totalPostReply;i++){
+        //获取帖子回复内容
+        let showReply = document.getElementById("postReplyID"+i);
+        let inputReply = document.getElementById("postReply"+i);
+        showReply.innerHTML=inputReply.value;
+        //获取用户回复内容
+        let totalUserReply = document.getElementById('id'+i).value;
+        for (let j = 0;j< totalUserReply;j++){
+            let showUserReply = document.getElementById(i+"userReplyID"+j);
+            let inputUserReply = document.getElementById(i+"userReply"+j);
+            showUserReply.innerHTML=inputUserReply.value;
+        }
+    }
+
+</script>
+<br/>
+<br/>
+
+<!--写回复内容-->
+<div>
+    <span class="errorMsg" id="msg" style="display: none">{{.}}</span>
+    <h2>写回复帖子内容</h2>
+    <div id="editor"></div>
+    <br/>
+    <button id="sub_btn">双击提交</button>
+    <script type="text/javascript">
+        let E = window.wangEditor
+        let editor = new E('#editor')
+        editor.config.menus = [
+            'head',  // 标题
+            'bold',  // 粗体
+            'fontSize',  // 字号
+            'fontName',  // 字体
+            'italic',  // 斜体
+            'justify',  // 对齐方式
+            'quote',  // 引用
+            'emoticon',  // 表情
+            'image',  // 插入图片
+            'undo',  // 撤销
+            'redo'  // 重复
+        ]
+        let config = editor.customConfig?editor.customConfig : editor.confg;
+        editor.config.uploadImgShowBase64 = true
+        editor.create()
+        $(function () {
+            $('#sub_btn').click(function () {
+                document.getElementById('sub_btn').addEventListener('click',function () {
+                    const content = editor.txt.html()
+                    if (content == ""){
+                        alert("内容不能为空！");
+                        return false;
+                    }
+                    let url = '/getPostReply'
+                    let param = {
+                        "content":content,
+                        "barName":$('#barName').val(),
+                        "title":$('#postTitle').val()
+                    }
+                    $.post(url,param,function (res) {
+                        //将响应信息设置到span元素中
+                        $('#msg').html(res)
+                        //获取span元素的值
+                        let msg = document.getElementById('msg').innerHTML
+                        alert(msg)
+                    });
+                    editor.txt.clear();
+                },false)
+            });
+        });
+    </script>
+</div>
+
+</body>
+<script>
+        let show = document.getElementById("show");
+        let input = document.getElementById("postContent");
+        show.innerHTML=input.value;
+</script>
+</body>
+</html>

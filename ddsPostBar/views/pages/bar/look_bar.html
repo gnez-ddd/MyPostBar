@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>吧的东西</title>
+    <script src="../../static/script/wangeditor-4.6.17/package/dist/wangEditor.js"></script>
+    <script src="../../static/script/jquery-1.7.2.js"></script>
+    <script>
+        $(function () {
+            //举报
+            $('#reportBar').click(function () {
+                //获取吧名
+                let barName = $('#barName').val();
+                let url = "/reportBar"
+                let param = {"barName":barName};
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素
+                    $("#msg").html(res);
+                    //获取id为msg的span元素的值
+                    let msg = document.getElementById('msg').innerHTML;
+                    alert(msg);
+                });
+                $(this).attr({"disabled":"disabled"});
+
+            })
+            $('#likedBar').click(function () {
+                //获取该吧名
+                let barName = $('#likedBar').val();
+                let url = "/likedBar";
+                let param={"barName":barName};
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素
+                    $("#msg").html(res);
+                    //获取id为msg的span元素的值
+                    let msg = document.getElementById('msg').innerHTML
+                    alert(msg)
+                    if (msg == "成功关注！"){
+                        $('#likedBar').attr({"disabled":"disabled"});
+                    }
+                });
+
+            });
+            $('#disLikedBar').click(function () {
+                //获取该吧名
+                let barName = $('#disLikedBar').val();
+                let url = "/disLikedBar";
+                let param={"barName":barName};
+                $.post(url,param,function (res) {
+                    //将响应信息设置到span元素
+                    $("#msg").html(res);
+                    //获取id为msg的span元素的值
+                    let msg = document.getElementById('msg').innerHTML
+                    alert(msg)
+                });
+                $(this).attr({"disabled":"disabled"});
+            });
+            $(function () {
+                $('#sub_btn_find').click(function () {
+                    //获取查找的值
+                    let find = $('#find').val();
+                    if (find == ""){
+                        alert("搜索不能为空！");
+                        return false;
+                    }
+                });
+            });
+            //给删除公告绑定点击事件
+            $('.deleteNotice').click(function () {
+                return confirm("确定要删除该公告吗？");
+            });
+            //给删除公告绑定点击事件
+            $('.deletePost').click(function () {
+                return confirm("确定要删除该帖子吗？");
+            });
+        });
+    </script>
+</head>
+<body>
+
+
+    <span class="errorMsg" id="msg" style="display: none" >{{.}}</span>
+<!--    该吧的信息-->
+    <div>
+        {{range.Bar}}
+        吧名：
+        <input class="itxt" type="text" value={{.BarName}} disabled="disabled" class="barName" id="barName"/>
+        &nbsp;&nbsp;&nbsp;
+        吧主：
+        <input class="itxt" type="text" value={{.BarHostName}} disabled="disabled" class="barHostName" id="barHostName"/>
+        &nbsp;&nbsp;&nbsp;
+        {{if.IsBarOwner}}
+        <a href="/toSendNoticePage?barName={{.BarName}}" class="sendNotice">发布公告</a>
+        &nbsp;&nbsp;&nbsp;
+        {{end}}
+<!--        是否要关注-->
+        {{if.IsLiked}}
+        <button value={{.BarName}} id="disLikedBar">取消关注</button>
+        {{else}}
+        <button value={{.BarName}} id="likedBar">关注该吧</button>
+        {{end}}
+        &nbsp;&nbsp;&nbsp;
+        <a href="/index">首页</a>
+        &nbsp;&nbsp;&nbsp;
+        <button id="reportBar">举报</button>
+        <br/>
+        <br/>
+        公告：
+        {{range.MyNotice}}
+        <div>
+            <br/>
+            <textarea name="content" id="content" cols="30" rows="10" disabled="disabled" >{{.Content}}</textarea>
+            <br/>
+            发布日期：
+            <input class="itxt" type="text" value={{.Time}} disabled="disabled" name="time" id="time" size="15"/>
+            <br/>
+            {{if.IsBarOwner}}
+            <a href="/deleteNotice?barName={{.BarName}}&time={{.Time}}" class="deleteNotice">删除</a>
+            {{end}}
+        </div>
+        {{end}}
+        {{end}}
+    </div>
+    <br/>
+
+<!--搜索帖子-->
+    <div>
+        {{range.Bar}}
+        <form action="/findPosts" method="post">
+            <input class="itxt" type="text" name="find" id="find" size="40"/>
+            <input class="itxt" type="text" name="bar" id="bar" value={{.BarName}} style="display: none">
+            <input type="submit" value="搜索" id="sub_btn_find">
+        </form>
+        {{end}}
+    </div>
+
+
+
+<!--写帖子-->
+    <div>
+        <h2>发帖子</h2>
+        标题：
+        <input class="itxt" type="text" maxlength="100" name="title" id="title" size="40"/>
+        <br/>
+        <br/>
+        <div id="editor"></div>
+        <br/>
+        <button id="sub_btn">双击提交</button>
+        <script type="text/javascript">
+            let E = window.wangEditor
+            let editor = new E('#editor')
+            editor.config.menus = [
+                'head',  // 标题
+                'bold',  // 粗体
+                'fontSize',  // 字号
+                'fontName',  // 字体
+                'italic',  // 斜体
+                'justify',  // 对齐方式
+                'quote',  // 引用
+                'emoticon',  // 表情
+                'image',  // 插入图片
+                'undo',  // 撤销
+                'redo'  // 重复
+            ]
+            let config = editor.customConfig ? editor.customConfig : editor.confg;
+            editor.config.uploadImgShowBase64 = true
+            editor.create()
+            $(function () {
+                $("#sub_btn").click(function () {
+                    document.getElementById('sub_btn').addEventListener('click',function () {
+                        let title = $('#title').val();
+                        if (title == ""){
+                            alert("标题不能为空！");
+                            return false;
+                        }
+                        const content = editor.txt.html()
+                        if (content == ""){
+                            alert("内容不能为空！");
+                            return false;
+                        }
+                        let url = "/postCreate"
+                        let param = {
+                            "content":content,
+                            "barName":$('#barName').val(),
+                            "title":title
+                        }
+                        $.post(url,param,function (res) {
+                            //将响应信息设置到span元素
+                            $("#msg").html(res);
+                            //获取span元素的值
+                            let show = document.getElementById("msg").innerHTML
+                            alert(show);
+                        });
+                        editor.txt.clear();
+                        $('#title').val("");
+                    },false)
+                });
+            });
+        </script>
+    </div>
+    <br/>
+    <br/>
+
+<!--查看吧内帖子-->
+    <div>
+        <h3>帖子</h3>
+        {{range.Bar}}
+        <a href="/postsOrderBy?barName={{.BarName}}&kind=time">按时间排序</a>
+        <a href="/postsOrderBy?barName={{.BarName}}&kind=postReply">按帖子回复量排序</a>
+        <br/>
+        {{end}}
+
+        {{range.Posts}}
+        <a href="/goToPost?barName={{.BarName}}&postTitle={{.PostTitle}}">{{.PostTitle}}</a>
+        &nbsp;&nbsp;&nbsp;
+        {{if.IsBarOwner}}
+        <a href="/deletePost?barName={{.BarName}}&postTitle={{.PostTitle}}&now=LookBar" class="deletePost">删除</a>
+        {{end}}
+        <br/>
+        <br/>
+        {{end}}
+    </div>
+</body>
+
+</html>
