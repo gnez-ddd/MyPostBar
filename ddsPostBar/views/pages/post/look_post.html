@@ -120,7 +120,7 @@
         标题：
         <input class="itxt" type="text" disabled="disabled" value={{.PostTitle}} name="postTitle" id="postTitle"/>
         发布者：
-        <input class="itxt" type="text" disabled="disabled" value={{.PostHostName}} name="postOwner" id="postOwner"/>
+        <a href="/look_user?userName={{.PostHostName}}">{{.PostHostName}}</a>
         发布时间：
         <input class="itxt" type="text" disabled="disabled" size="30" value={{.PostDate}} name="date" id="date" />
         &nbsp;&nbsp;
@@ -160,7 +160,7 @@
             <br/>
             <input class="itxt" type="text" value={{.ID}} name="replyID" id="replyID" style="display: none"/>
             用户：
-            <input class="itxt" type="text" value={{.UserName}} name="replyEr" id="replyEr" disabled="disabled"/>
+            <a href="/look_user?userName={{.UserName}}">{{.UserName}}</a>
              &nbsp;&nbsp;&nbsp;
              时间：
             <input class="itxt" type="text" value={{.Time}} name="replyTime" id="replyTime" disabled="disabled"/>
@@ -177,7 +177,7 @@
                 <div>
                     <br/>
                     用户：
-                    <input class="itxt" type="text" value={{.UserName}} name="userReplyEr" id="userReplyEr" disabled="disabled"/>
+                    <a href="/look_user?userName={{.UserName}}">{{.UserName}}</a>
                     &nbsp;&nbsp;&nbsp;
                     时间：
                     <input class="itxt" type="text" value={{.Time}} name="userReplyTime" id="userReplyTime" disabled="disabled"/>
