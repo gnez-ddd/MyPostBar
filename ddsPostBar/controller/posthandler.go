@@ -232,7 +232,7 @@ func PostsOrderByTimeInFindPosts (w http.ResponseWriter,r *http.Request){
 	_ = t.Execute(w,page)
 }
 
-//GetPostReply 写帖子回复内容
+//GetPostReply 写回复内容
 func GetPostReply(w http.ResponseWriter,r *http.Request){
 	//是否登录
 	judge,sess  := dao.IsLogin(r)
@@ -241,33 +241,32 @@ func GetPostReply(w http.ResponseWriter,r *http.Request){
 	if judge == false {
 		_,_ = w.Write([]byte("请先登录！"))
 		return
-	} else {
-		//获取贴吧名当前用户内容标题
-		barName := r.PostFormValue("barName")
-		content := r.PostFormValue("content")
-		title := r.PostFormValue("title")
-		user := dao.FindUserByUserID(sess.UserID)
-
-		//先将信息存储到数据库中并获取该帖子回复id
-		id := dao.AddPostReply(barName,title,user.UserID)
-
-		//将内容放进文件夹中
-		postPath := "views/static/postReply/" + barName + title + "id" + strconv.FormatInt(id,10) + ".txt"
-		file,_ := os.OpenFile(postPath ,os.O_CREATE | os.O_APPEND,0666)
-		defer file.Close()
-		file.WriteString(content)
-
-		//修改数据库中该帖子回复的内容路径
-		dao.SetContentByID(id,postPath)
-
-
-		//修改帖子的回复量
-		post := dao.FindCreatePostByBarNameAndTitle(barName,title)
-		post.TotalReply++
-		dao.SetTotalPostReply(barName,title,post.TotalReply)
-
-		_, _ = w.Write([]byte("回复成功！"))
 	}
+	//获取贴吧名当前用户内容标题
+	barName := r.PostFormValue("barName")
+	content := r.PostFormValue("content")
+	title := r.PostFormValue("title")
+	user := dao.FindUserByUserID(sess.UserID)
+
+	//先将信息存储到数据库中并获取该帖子回复id
+	id := dao.AddPostReply(barName,title,user.UserID)
+
+	//将内容放进文件夹中
+	postPath := "views/static/postReply/" + barName + title + "id" + strconv.FormatInt(id,10) + ".txt"
+	file,_ := os.OpenFile(postPath ,os.O_CREATE | os.O_APPEND,0666)
+	defer file.Close()
+	file.WriteString(content)
+
+	//修改数据库中该帖子回复的内容路径
+	dao.SetContentByID(id,postPath)
+
+
+	//修改帖子的回复量
+	post := dao.FindCreatePostByBarNameAndTitle(barName,title)
+	post.TotalReply++
+	dao.SetTotalPostReply(barName,title,post.TotalReply)
+
+	_, _ = w.Write([]byte("回复成功！"))
 }
 
 //ToReplyUserInPostPage 去写帖子回复内容的回复内容页面
@@ -413,8 +412,6 @@ func AgreeToRecoverPost(w http.ResponseWriter,r *http.Request){
 		_,_ = w.Write([]byte("该帖子的贴吧已被封禁，恢复失败！"))
 	}
 }
-
-
 
 //BannedPost 封禁帖子
 func BannedPost(w http.ResponseWriter,r *http.Request){

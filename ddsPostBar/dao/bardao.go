@@ -5,21 +5,6 @@ import (
 	"MyPostBar/ddsPostBar/utils"
 )
 
-/*
-create table bars
-(
-    id         int auto_increment
-        primary key,
-    total_post int        default 0 not null,
-    total_fan  int        default 0 not null,
-    host_id    int                  not null,
-    bar_name   varchar(100)         not null,
-    status     tinyint(1) default 0 not null,
-    constraint bars_ibfk_1
-        foreign key (host_id) references users (id)
-);
- */
-
 // AddBar 增加贴吧
 func AddBar(userID int64,barName string,kind string){
 	//写sql语句
@@ -149,7 +134,6 @@ func SetTotalFanByBarName(totalFan int64,barName string){
 	sqlStr := "update bars set total_fan = ? where bar_name = ? ;"
 	_,_ = utils.Db.Exec(sqlStr,totalFan,barName)
 }
-
 
 //DisLikedBar 取消关注贴吧
 func DisLikedBar(barName string,hostID int64){

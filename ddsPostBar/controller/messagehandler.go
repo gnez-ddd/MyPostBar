@@ -9,7 +9,6 @@ import (
 
 //GetCreateBarMessages 查看收到的申请创建贴吧的信息
 func GetCreateBarMessages(w http.ResponseWriter,r *http.Request){
-
 	//调用数据库查看当前用户所拥有申请创建贴吧的信息
 	createBarMessages := dao.GetCreateBarMessageByReceiverID(13)
 	//发送给前端
@@ -47,8 +46,6 @@ func GetPostApplicationToRecover(w http.ResponseWriter,r *http.Request){
 	}
 	//重新查找
 	messages = dao.FindPostApplicationToRecoverMessage(sess.UserID)
-
-
 	t := template.Must(template.ParseFiles("views/pages/message/postApplication.html"))
 	_ = t.Execute(w,messages)
 }

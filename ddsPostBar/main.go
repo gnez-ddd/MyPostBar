@@ -100,7 +100,7 @@ func main(){
 	http.HandleFunc("/toReplyUserInPostPage",controller.ToReplyUserInPostPage)
 
 	//获取回复他人回复内容
-	http.HandleFunc("/getUerReply",controller.GetUserReply)
+	http.HandleFunc("/getUserReply",controller.GetUserReply)
 
 	//点赞帖子
 	http.HandleFunc("/PostIsThumb",controller.PostIsThumb)
@@ -189,14 +189,9 @@ func main(){
 	//通过Ajax判断验证码是否正确
 	http.HandleFunc("/checkCode",controller.CheckCode)
 
-	//根据用户名验证验证码是否正确
-	http.HandleFunc("/checkCodeByUserName",controller.CheckCodeByUserName)
-
 	//通过发送验证码
 	http.HandleFunc("/sendEmail",controller.SendEmail)
 
-	//根据用户名发送验证码
-	http.HandleFunc("/sendEmailByUserName",controller.SendEmailByUserName)
 
 	_ = http.ListenAndServe(":8080", nil)
 

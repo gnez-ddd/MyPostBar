@@ -5,22 +5,6 @@ import (
 	"MyPostBar/ddsPostBar/utils"
 )
 
-/*
-create table messages
-(
-	id          int                  not null
-        primary key,
-    receiver_id int                  not null,
-    sender_id   int                  not null,
-    content     varchar(500)         not null,
-    status      tinyint(1) default 0 not null,
-    constraint massages_users__id_fk
-        foreign key (receiver_id) references users (id),
-    constraint massages_users_id_fk
-        foreign key (sender_id) references users (id)
-);
- */
-
 //AddCreateBarMessage 增加申请创建贴吧信息
 func AddCreateBarMessage(receiverID int64,senderID int64,barName string){
 	//写sql语句
@@ -30,7 +14,7 @@ func AddCreateBarMessage(receiverID int64,senderID int64,barName string){
 }
 
 //GetCreateBarMessageByReceiverID 根据接收者id查看申请创建贴吧信息
-func GetCreateBarMessageByReceiverID(id int64)([]*model.Message){
+func GetCreateBarMessageByReceiverID(id int64)[]*model.Message{
 	//写sql语句
 	sqlStr := "select * from createBarMessages where receiver_id = ?;"
 	//执行
@@ -49,7 +33,6 @@ func GetCreateBarMessageByReceiverID(id int64)([]*model.Message){
 	}
 	return createBarMessages
 }
-
 
 //DeleteCreateBarMessageByBarName 根据吧名删除申请创建贴吧消息
 func DeleteCreateBarMessageByBarName(barName string){

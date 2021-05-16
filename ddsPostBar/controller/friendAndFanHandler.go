@@ -81,7 +81,6 @@ func LikedUser(w http.ResponseWriter,r *http.Request){
 		_,_ = w.Write([]byte("请先登录！"))
 		return
 	}
-
 	id := r.PostFormValue("id")
 	ID,_ := strconv.ParseInt(id,10,64)
 	dao.AddLikedUser(ID,sess.UserID)

@@ -12,7 +12,10 @@
                 let email = $("#email").val();
                 let url = "/sendEmail";
                 //设置请求参数
-                let param = {"email":email};
+                let param = {
+                    "send":email,
+                    "kind":"email"
+                };
                 //发送Ajax请求
                 $.post(url,param,function (res) {
                     //将显示提示信息的span元素显示
@@ -121,7 +124,8 @@
                 //设置请求参数
                 let param = {
                     "codeInput":codeInput,
-                    "email":email
+                    "address":email,
+                    "kind":"email"
                 };
                 //发送Ajax请求
                 $.post(url,param,function (res) {

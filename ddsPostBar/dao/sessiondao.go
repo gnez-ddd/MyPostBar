@@ -6,15 +6,6 @@ import (
 	"net/http"
 )
 
-/*
- create table sessions(
-    -> session_id varchar(100) primary key,
-    -> username varchar(100) not null,
-    -> user_id int not null,
-    -> foreign key(user_id) references users(id)
-    -> );
- */
-
 // AddSession 添加sess
 func AddSession(sess *model.Session){
 	//写sql语句

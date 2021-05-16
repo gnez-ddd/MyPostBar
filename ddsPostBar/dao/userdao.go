@@ -93,8 +93,6 @@ func SetUserInformation(username string,email string,headPath string,userID int6
 	_,_ = utils.Db.Exec(sqlStr,username,email,headPath,salt,psw,userID)
 }
 
-
-
 //FindSaltByUserID 根据用户id查看用户的盐值
 func FindSaltByUserID(id int64)(salt string){
 	sqlStr := "select salt from users where id = ? ;"
