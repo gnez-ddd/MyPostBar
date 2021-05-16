@@ -184,6 +184,20 @@ func FindPostsByBarNameAndFindOrderByTime(barName string,find string)[]*model.Po
 	return posts
 }
 
+//FindPostsByBarNameAndFindOrderByReply 根据吧名搜索信息按回复量查找
+func FindPostsByBarNameAndFindOrderByReply(barName string,find string)[]*model.Post{
+	//写sql语句
+	sqlStr := "select Bar_name,title from posts where bar_name = ? and kind= ? and status = 1 and title like ? order by totalpostReply desc; "
+	rows,_ := utils.Db.Query(sqlStr,barName,"create",find)
+	var posts []*model.Post
+	for rows.Next(){
+		post := &model.Post{}
+		_ = rows.Scan(&post.BarName,&post.PostTitle)
+		posts = append(posts,post)
+	}
+	return posts
+}
+
 //IsPostThumbByBarNameAndUserIDAndKind 是否点赞
 func IsPostThumbByBarNameAndUserIDAndKind(barName string,hostID int64,title string)bool{
 	sqlStr := "select id from posts where bar_name = ? and host_id = ? and title = ? and kind = ? and is_thumb = ? ;"

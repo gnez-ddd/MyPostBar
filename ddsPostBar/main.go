@@ -91,7 +91,7 @@ func main(){
 	http.HandleFunc("/postsOrderBy",controller.PostsOrderBy)
 
 	//在搜索帖子内按时间由近到远将帖子排序
-	http.HandleFunc("/postsOrderByTimeInFindPosts",controller.PostsOrderByTimeInFindPosts)
+	http.HandleFunc("/postsOrderByTimeOrReplyInFindPosts",controller.PostsOrderByTimeOrReplyInFindPosts)
 
 	//写帖子回复内容
 	http.HandleFunc("/getPostReply",controller.GetPostReply)
@@ -154,7 +154,7 @@ func main(){
 	http.HandleFunc("/look_user",controller.LookUser)
 
 	//申请添加好友
-	http.HandleFunc("/aksToMakeFriend",controller.AskToMakeFriend)
+	http.HandleFunc("/askToMakeFriend",controller.AskToMakeFriend)
 
 	//获取申请成为好友消息
 	http.HandleFunc("/getMakeFriendMessage",controller.GetMakeFriendMessage)

@@ -5,13 +5,13 @@
     <title>吧内搜索帖子</title>
 </head>
 <body>
+<a href="/index">首页</a>
   <div>
     <h3>搜索到的帖子</h3>
-    <form action="/postsOrderByTimeInFindPosts" method="post">
         <input class="itxt" type="text" value={{.BarNow}} id="orderBarName" name="orderBarName" style="display: none"/>
         <input class="itxt" type="text" value={{.Find}} id="orderFind" name="orderFind" style="display: none"/>
-        <input type="submit" value="按时间由近到远排序" id="orderByTime">
-    </form>
+        <a href="/postsOrderByTimeOrReplyInFindPosts?orderFind={{.Find}}&orderBarName={{.BarNow}}&kind=time">按时间排序</a>
+         <a href="/postsOrderByTimeOrReplyInFindPosts?orderFind={{.Find}}&orderBarName={{.BarNow}}&kind=reply">按帖子回复量排序</a>
     <br/>
     <br/>
     {{range.Posts}}

@@ -35,8 +35,11 @@
                     //获取id为msg的span元素的值
                     let msg = document.getElementById('msg').innerHTML;
                     alert(msg);
+                    if (msg == "成功关注！"){
+                        $('#likedUser').attr({"disabled":"disabled"});
+                    }
                 });
-                $(this).attr({"disabled":"disabled"});
+
             });
         });
     </script>

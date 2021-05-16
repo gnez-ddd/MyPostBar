@@ -216,13 +216,20 @@ func FindPosts(w http.ResponseWriter,r *http.Request){
 	_ = t.Execute(w,page)
 }
 
-//PostsOrderByTimeInFindPosts 在搜索帖子内按时间排序
-func PostsOrderByTimeInFindPosts (w http.ResponseWriter,r *http.Request){
+//PostsOrderByTimeOrReplyInFindPosts 在搜索帖子内按时间或回复量排序
+func PostsOrderByTimeOrReplyInFindPosts (w http.ResponseWriter,r *http.Request){
 	//获取吧名和搜索的信息
-	barName := r.PostFormValue("orderBarName")
-	find := r.PostFormValue("orderFind")
-	//调用数据库根据吧名和搜索信息按时间排序搜索帖子
-	posts := dao.FindPostsByBarNameAndFindOrderByTime(barName,"%"+find+"%")
+	barName := r.FormValue("orderBarName")
+	find := r.FormValue("orderFind")
+	kind := r.FormValue("kind")
+	var posts []*model.Post
+	if kind == "time" {
+		//调用数据库根据吧名和搜索信息按时间排序搜索帖子
+		posts = dao.FindPostsByBarNameAndFindOrderByTime(barName,"%"+find+"%")
+	} else {
+		posts = dao.FindPostsByBarNameAndFindOrderByReply(barName,"%"+find+"%")
+	}
+
 	page := &model.Page{
 		Posts: posts,
 		BarNow:barName,

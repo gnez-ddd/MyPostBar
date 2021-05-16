@@ -382,12 +382,13 @@ func LookUser(w http.ResponseWriter,r *http.Request){
 		user.IsFriend = dao.FindIsFriend(user.UserID,sess.UserID)
 		//判断是否关注了
 		user.IsLiked = dao.FindIsLiked(sess.UserID,user.UserID)
+		//若查看的用户为用户本人
+		if user.UserID == sess.UserID {
+			user.IsLiked = true
+			user.IsFriend = true
+		}
 	}
-	//若查看的用户为用户本人
-	if user.UserID == sess.UserID {
-		user.IsLiked = true
-		user.IsFriend = true
-	}
+
 
 	t := template.Must(template.ParseFiles("views/pages/user/look_user.html"))
 	_ = t.Execute(w,user)
