@@ -226,14 +226,14 @@ func IsPostLikedByBarNameAndUserID(barName string,hostID int64,title string)bool
 
 //ThumbPost 点赞
 func ThumbPost (barName string,hostID int64,title string){
-	sqlStr := "insert into posts (bar_name,host_id,title,is_thumb) values (?,?,?,?);"
-	_,_ = utils.Db.Exec(sqlStr,hostID,barName,title,1)
+	sqlStr := "insert into posts (bar_name,host_id,title,is_thumb) values (?,?,?,1);"
+	_,_ = utils.Db.Exec(sqlStr,barName,hostID,title)
 }
 
 //DisThumbPost 取消点赞
 func DisThumbPost(barName string,hostID int64,title string){
-	sqlStr := "delete from posts where bar_name = ? and host_id = ? and title = ? and is_thumb = ? ;"
-	_,_ = utils.Db.Exec(sqlStr,barName,hostID,title,1)
+	sqlStr := "delete from posts where bar_name = ? and host_id = ? and title = ? and is_thumb = 1 ;"
+	_,_ = utils.Db.Exec(sqlStr,barName,hostID,title)
 }
 
 //LikedPost 收藏帖子
